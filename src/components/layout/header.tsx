@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { Clapperboard, Search, Tv, CalendarDays } from 'lucide-react';
+import { Clapperboard, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -52,7 +53,7 @@ export default function Header() {
             Jadwal
           </Link>
         </nav>
-        <div className="flex flex-1 items-center justify-end space-x-4">
+        <div className="flex flex-1 items-center justify-end space-x-2">
           <form
             onSubmit={handleSearch}
             className="w-full flex-1 md:w-auto md:flex-none"
@@ -68,6 +69,7 @@ export default function Header() {
               />
             </div>
           </form>
+          <ThemeToggle />
         </div>
       </div>
     </header>
