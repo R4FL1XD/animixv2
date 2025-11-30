@@ -126,7 +126,7 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
                 <div className="max-h-[400px] overflow-y-auto pr-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
                   {anime.episodeList.map(ep => (
                     <Button key={ep.episodeId} variant="outline" asChild>
-                      <Link href={ep.href}>Eps {ep.title}</Link>
+                      <Link href={`/episode/${ep.episodeId}`}>Eps {ep.title}</Link>
                     </Button>
                   ))}
                 </div>

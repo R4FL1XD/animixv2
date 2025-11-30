@@ -1,4 +1,4 @@
-import type { HomeData, AnimeDetailData } from './types';
+import type { HomeData, AnimeDetailData, EpisodeDetailData } from './types';
 
 const API_BASE_URL = 'https://www.sankavollerei.com';
 
@@ -46,4 +46,24 @@ export async function getAnimeDetails(animeId: string): Promise<AnimeDetailData 
     console.error(`Error fetching details for ${animeId}:`, error);
     return null;
   }
+}
+
+export async function getEpisodeDetails(episodeId: string): Promise<EpisodeDetailData | null> {
+    if (!episodeId) return null;
+    try {
+        const res = await fetch(`${API_BASE_URL}/anime/samehadaku/episode/${episodeId}`, {
+            next: { revalidate: 3600 },
+        });
+
+        if (!res.ok) {
+            console.error(`Failed to fetch episode details for ${episodeId}:`, res.status, res.statusText);
+            return null;
+        }
+
+        const data: EpisodeDetailData = await res.json();
+        return data;
+    } catch (error) {
+        console.error(`Error fetching episode details for ${episodeId}:`, error);
+        return null;
+    }
 }

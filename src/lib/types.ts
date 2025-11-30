@@ -105,3 +105,73 @@ export interface AnimeDetailData {
   message: string;
   data: AnimeDetail;
 }
+
+
+// Types for Episode Detail Page
+export interface EpisodeNav {
+  title: string;
+  episodeId: string;
+  href: string;
+  samehadakuUrl: string;
+}
+
+export interface ServerItem {
+  title: string;
+  serverId: string;
+  href: string;
+}
+
+export interface Quality {
+  title: string;
+  serverList: ServerItem[];
+}
+
+export interface Server {
+  qualities: Quality[];
+}
+
+export interface DownloadURL {
+    title: string;
+    url: string;
+}
+
+export interface DownloadQuality {
+    title: string;
+    urls: DownloadURL[];
+}
+
+export interface DownloadFormat {
+    title: string;
+    qualities: DownloadQuality[];
+}
+
+export interface EpisodeDetail {
+    title: string;
+    animeId: string;
+    poster: string;
+    releasedOn: string;
+    defaultStreamingUrl: string;
+    hasPrevEpisode: boolean;
+    prevEpisode: EpisodeNav | null;
+    hasNextEpisode: boolean;
+    nextEpisode: EpisodeNav | null;
+    synopsis: Synopsis;
+    genreList: Genre[];
+    server: Server;
+    downloadUrl: {
+        formats: DownloadFormat[];
+    };
+    recommendedEpisodeList: Anime[];
+    movie: {
+        href: string;
+        samehadakuUrl: string;
+        animeList: Anime[];
+    };
+}
+
+export interface EpisodeDetailData {
+    status: string;
+    creator: string;
+    message: string;
+    data: EpisodeDetail;
+}
