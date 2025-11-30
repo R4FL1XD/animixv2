@@ -1,4 +1,4 @@
-import type { HomeData, AnimeDetailData, EpisodeDetailData, ServerUrlData, SearchData, PaginatedAnimeData, ScheduleData } from './types';
+import type { HomeData, AnimeDetailData, EpisodeDetailData, ServerUrlData, SearchData, PaginatedAnimeData, ScheduleData, AllAnimeData } from './types';
 
 const API_BASE_URL = 'https://www.sankavollerei.com';
 
@@ -211,3 +211,22 @@ export async function getPopularAnime(page: number = 1): Promise<PaginatedAnimeD
     return null;
   }
 }
+
+export async function getAllAnimeList(): Promise<AllAnimeData | null> {
+    try {
+      const res = await fetch(`${API_BASE_URL}/anime/samehadaku/list`, {
+        next: { revalidate: 3600 * 24 }, // Revalidate once a day
+      });
+  
+      if (!res.ok) {
+        console.error('Failed to fetch all anime list:', res.status, res.statusText);
+        return null;
+      }
+  
+      const data: AllAnimeData = await res.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching all anime list:', error);
+      return null;
+    }
+  }

@@ -26,6 +26,7 @@ export default function Header() {
     if (searchQuery.trim()) {
       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
+      setIsSheetOpen(false);
     }
   };
 
@@ -34,45 +35,51 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 max-w-screen-2xl items-center">
         <div className="mr-4 hidden md:flex">
             <Link href="/" className="mr-6 flex items-center space-x-2">
-            <Clapperboard className="h-7 w-7 text-primary" />
-            <span className="hidden font-bold sm:inline-block font-headline text-2xl text-primary">
+            <Clapperboard className="h-6 w-6 text-primary" />
+            <span className="font-bold sm:inline-block text-lg">
                 Animix
             </span>
             </Link>
             <nav className="flex items-center gap-6 text-sm font-medium">
             <Link
                 href="/browse"
-                className="transition-colors hover:text-primary text-foreground"
+                className="transition-colors hover:text-foreground/80 text-foreground/60"
             >
                 Browse
             </Link>
              <Link
                 href="/movies"
-                className="transition-colors hover:text-primary text-foreground"
+                className="transition-colors hover:text-foreground/80 text-foreground/60"
             >
                 Movies
             </Link>
             <Link
                 href="/recent"
-                className="transition-colors hover:text-primary text-foreground"
+                className="transition-colors hover:text-foreground/80 text-foreground/60"
             >
                 New
             </Link>
             <Link
                 href="/popular"
-                className="transition-colors hover:text-primary text-foreground"
+                className="transition-colors hover:text-foreground/80 text-foreground/60"
             >
                 Popular
             </Link>
             <Link
                 href="/schedule"
-                className="transition-colors hover:text-primary text-foreground"
+                className="transition-colors hover:text-foreground/80 text-foreground/60"
             >
                 Schedule
+            </Link>
+            <Link
+                href="/all"
+                className="transition-colors hover:text-foreground/80 text-foreground/60"
+            >
+                All Anime
             </Link>
             </nav>
         </div>
@@ -90,10 +97,10 @@ export default function Header() {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="pr-0">
-             <SheetTitle className="sr-only">Menu</SheetTitle>
+             <SheetTitle className='sr-only'>Menu</SheetTitle>
              <Link href="/" className="mr-6 flex items-center space-x-2 px-6" onClick={handleLinkClick}>
-                <Clapperboard className="h-7 w-7 text-primary" />
-                <span className="font-bold font-headline text-2xl text-primary">
+                <Clapperboard className="h-6 w-6 text-primary" />
+                <span className="font-bold text-lg">
                     Animix
                 </span>
             </Link>
@@ -102,37 +109,44 @@ export default function Header() {
                 <Link
                     href="/browse"
                     onClick={handleLinkClick}
-                    className="transition-colors hover:text-primary text-foreground"
+                    className="transition-colors hover:text-primary"
                 >
                     Browse
                 </Link>
                 <Link
                     href="/movies"
                     onClick={handleLinkClick}
-                    className="transition-colors hover:text-primary text-foreground"
+                    className="transition-colors hover:text-primary"
                 >
                     Movies
                 </Link>
                 <Link
                     href="/recent"
                     onClick={handleLinkClick}
-                    className="transition-colors hover:text-primary text-foreground"
+                    className="transition-colors hover:text-primary"
                 >
                     New
                 </Link>
                 <Link
                     href="/popular"
                     onClick={handleLinkClick}
-                    className="transition-colors hover:text-primary text-foreground"
+                    className="transition-colors hover:text-primary"
                 >
                     Popular
                 </Link>
                 <Link
                     href="/schedule"
                     onClick={handleLinkClick}
-                    className="transition-colors hover:text-primary text-foreground"
+                    className="transition-colors hover:text-primary"
                 >
                     Schedule
+                </Link>
+                 <Link
+                    href="/all"
+                    onClick={handleLinkClick}
+                    className="transition-colors hover:text-primary"
+                >
+                    All Anime
                 </Link>
             </div>
           </SheetContent>
@@ -140,8 +154,8 @@ export default function Header() {
         
         <div className="md:hidden flex-1">
             <Link href="/" className="flex items-center space-x-2 justify-center">
-                 <Clapperboard className="h-7 w-7 text-primary" />
-                 <span className="font-bold sm:inline-block font-headline text-2xl text-primary">
+                 <Clapperboard className="h-6 w-6 text-primary" />
+                 <span className="font-bold sm:inline-block text-lg">
                     Animix
                 </span>
             </Link>
@@ -158,18 +172,13 @@ export default function Header() {
               <Input
                 type="search"
                 placeholder="Search..."
-                className="pl-9 w-full md:w-48 lg:w-64 !h-9"
+                className="pl-9 w-full md:w-48 lg:w-64"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
           </form>
-          <div className="hidden md:flex items-center space-x-2">
-            <ThemeToggle />
-          </div>
-          <div className="md:hidden">
-             <ThemeToggle />
-          </div>
+          <ThemeToggle />
         </div>
       </div>
     </header>

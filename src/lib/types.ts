@@ -246,3 +246,26 @@ export interface ScheduleData {
     };
     pagination: null;
 }
+
+// Types for All Anime List Page
+export interface AllAnimeItem {
+    title: string;
+    animeId: string;
+    href: string;
+    samehadakuUrl: string;
+  }
+  
+  export interface AllAnimeGroup {
+    startWith: string;
+    animeList: AllAnimeItem[];
+  }
+  
+  export interface AllAnimeData {
+    status: string;
+    creator: string;
+    message: string;
+    data: {
+      list: AllAnimeGroup[];
+    };
+    pagination: null;
+  }
