@@ -70,6 +70,12 @@ export default function Header() {
                 Popular
             </Link>
             <Link
+                href="/completed"
+                className="transition-colors hover:text-foreground/80 text-foreground/60"
+            >
+                Completed
+            </Link>
+            <Link
                 href="/schedule"
                 className="transition-colors hover:text-foreground/80 text-foreground/60"
             >
@@ -133,6 +139,13 @@ export default function Header() {
                     className="transition-colors hover:text-primary"
                 >
                     Popular
+                </Link>
+                 <Link
+                    href="/completed"
+                    onClick={handleLinkClick}
+                    className="transition-colors hover:text-primary"
+                >
+                    Completed
                 </Link>
                 <Link
                     href="/schedule"

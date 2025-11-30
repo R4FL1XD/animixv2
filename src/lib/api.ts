@@ -229,4 +229,23 @@ export async function getAllAnimeList(): Promise<AllAnimeData | null> {
       console.error('Error fetching all anime list:', error);
       return null;
     }
-  }
+}
+  
+export async function getCompletedAnime(page: number = 1): Promise<PaginatedAnimeData | null> {
+    try {
+      const res = await fetch(`${API_BASE_URL}/anime/samehadaku/completed?page=${page}`, {
+        next: { revalidate: 3600 }, // Revalidate every hour
+      });
+  
+      if (!res.ok) {
+        console.error('Failed to fetch completed anime:', res.status, res.statusText);
+        return null;
+      }
+  
+      const data: PaginatedAnimeData = await res.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching completed anime:', error);
+      return null;
+    }
+}
