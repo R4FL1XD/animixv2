@@ -5,7 +5,6 @@ import { Clapperboard, Menu, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '../ui/button';
 import {
   Sheet,
@@ -14,6 +13,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { Separator } from '../ui/separator';
+import { ThemeToggle } from '../theme-toggle';
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
