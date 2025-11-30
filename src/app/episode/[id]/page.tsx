@@ -1,10 +1,10 @@
 'use client';
 
-import { getEpisodeDetails, getServerUrl } from '@/lib/api';
+import { getEpisodeDetails, getServerUrl, getAnimeDetails } from '@/lib/api';
 import { notFound, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, Download, Server, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, Server, Loader2, Home, ChevronsRight } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
@@ -14,14 +14,33 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AnimeCarousel from '@/components/anime-carousel';
-import type { EpisodeDetail } from '@/lib/types';
+import type { EpisodeDetail, AnimeDetail } from '@/lib/types';
 import { useState, useEffect } from 'react';
+
+const Breadcrumb = ({ animeTitle, episodeTitle, animeId }: { animeTitle: string; episodeTitle: string; animeId: string; }) => {
+  return (
+    <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
+      <Link href="/" className="flex items-center gap-1.5 hover:text-primary transition-colors">
+        <Home className="h-4 w-4" />
+        Home
+      </Link>
+      <ChevronsRight className="h-4 w-4" />
+      <Link href={`/anime/${animeId}`} className="hover:text-primary transition-colors truncate max-w-48 md:max-w-96">
+        {animeTitle}
+      </Link>
+      <ChevronsRight className="h-4 w-4" />
+      <span className="font-medium text-foreground truncate">{episodeTitle}</span>
+    </div>
+  );
+};
+
 
 export default function EpisodeDetailPage() {
   const params = useParams();
   const { id } = params;
 
   const [episodeDetails, setEpisodeDetails] = useState<EpisodeDetail | null>(null);
+  const [animeDetails, setAnimeDetails] = useState<AnimeDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [streamingUrl, setStreamingUrl] = useState('');
   const [loadingStream, setLoadingStream] = useState(false);
@@ -39,6 +58,14 @@ export default function EpisodeDetailPage() {
       setEpisodeDetails(details.data);
       setStreamingUrl(details.data.defaultStreamingUrl);
       setActiveServerId(details.data.defaultStreamingUrl);
+      
+      if (details.data.animeId) {
+        const animeData = await getAnimeDetails(details.data.animeId);
+        if (animeData?.data) {
+          setAnimeDetails(animeData.data);
+        }
+      }
+
       setLoading(false);
     }
     fetchDetails();
@@ -72,11 +99,13 @@ export default function EpisodeDetailPage() {
 
   return (
     <div className="container py-8 md:py-12">
-      <div className="mb-4">
-        <Link href={`/anime/${episode.animeId}`} className="text-sm text-primary hover:underline">
-          &larr; Back to Anime Details
-        </Link>
-      </div>
+      {animeDetails && (
+        <Breadcrumb 
+          animeTitle={animeDetails.title} 
+          episodeTitle={episode.title}
+          animeId={episode.animeId}
+        />
+      )}
 
       <h1 className="text-3xl md:text-4xl font-headline font-bold mb-2">{episode.title}</h1>
       <p className="text-muted-foreground mb-6">Released: {episode.releasedOn}</p>
