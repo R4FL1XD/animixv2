@@ -50,3 +50,58 @@ export interface HomeData {
   };
   pagination: null;
 }
+
+// Types for Anime Detail Page
+export interface Score {
+  value: string;
+  users: string;
+}
+
+export interface Synopsis {
+  paragraphs: string[];
+  connections: any[];
+}
+
+export interface Batch {
+  title: string;
+  batchId: string;
+  href: string;
+  samehadakuUrl: string;
+}
+
+export interface Episode {
+  title: number | string;
+  episodeId: string;
+  href: string;
+  samehadakuUrl: string;
+}
+
+export interface AnimeDetail {
+  title: string;
+  poster: string;
+  score: Score | null;
+  japanese: string;
+  synonyms: string;
+  english: string;
+  status: string;
+  type: string;
+  source: string;
+  duration: string;
+  episodes: number | null;
+  season: string;
+  studios: string;
+  producers: string;
+  aired: string;
+  trailer: string;
+  synopsis: Synopsis;
+  genreList: Genre[];
+  batchList: Batch[];
+  episodeList: Episode[];
+}
+
+export interface AnimeDetailData {
+  status: string;
+  creator: string;
+  message: string;
+  data: AnimeDetail;
+}
