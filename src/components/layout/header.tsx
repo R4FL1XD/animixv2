@@ -109,11 +109,6 @@ export default function Header() {
                     Schedule
                 </Link>
             </div>
-             <Separator className="my-4" />
-              <div className="flex flex-col space-y-3 px-6">
-                 <Button variant="outline" onClick={handleLinkClick}>Log In</Button>
-                 <Button onClick={handleLinkClick}>Sign Up</Button>
-            </div>
           </SheetContent>
         </Sheet>
         
@@ -145,8 +140,6 @@ export default function Header() {
           </form>
           <div className="hidden md:flex items-center space-x-2">
             <ThemeToggle />
-            <Button variant="outline" size="sm">Log In</Button>
-            <Button size="sm">Sign Up</Button>
           </div>
           <div className="md:hidden">
              <ThemeToggle />
