@@ -9,3 +9,4 @@ To get started, take a look at src/app/page.tsx.
 # animix
 # animix
 # animixv2
+# animixv2
