@@ -134,3 +134,23 @@ export async function getRecentAnime(page: number = 1): Promise<PaginatedAnimeDa
     return null;
   }
 }
+
+export async function getAnimeByGenre(genreId: string, page: number = 1): Promise<PaginatedAnimeData | null> {
+  if (!genreId) return null;
+  try {
+    const res = await fetch(`${API_BASE_URL}/anime/samehadaku/genres/${genreId}?page=${page}`, {
+      next: { revalidate: 3600 }, // Revalidate every hour
+    });
+
+    if (!res.ok) {
+      console.error(`Failed to fetch anime for genre ${genreId}:`, res.status, res.statusText);
+      return null;
+    }
+
+    const data: PaginatedAnimeData = await res.json();
+    return data;
+  } catch (error) {
+    console.error(`Error fetching anime for genre ${genreId}:`, error);
+    return null;
+  }
+}
