@@ -1,4 +1,4 @@
-import type { HomeData, AnimeDetailData, EpisodeDetailData, ServerUrlData, SearchData, PaginatedAnimeData } from './types';
+import type { HomeData, AnimeDetailData, EpisodeDetailData, ServerUrlData, SearchData, PaginatedAnimeData, ScheduleData } from './types';
 
 const API_BASE_URL = 'https://www.sankavollerei.com';
 
@@ -154,3 +154,22 @@ export async function getAnimeByGenre(genreId: string, page: number = 1): Promis
     return null;
   }
 }
+
+export async function getScheduleData(): Promise<ScheduleData | null> {
+    try {
+      const res = await fetch(`${API_BASE_URL}/anime/samehadaku/schedule`, {
+        next: { revalidate: 3600 * 6 }, // Revalidate every 6 hours
+      });
+  
+      if (!res.ok) {
+        console.error('Failed to fetch schedule data:', res.status, res.statusText);
+        return null;
+      }
+  
+      const data: ScheduleData = await res.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching schedule data:', error);
+      return null;
+    }
+  }

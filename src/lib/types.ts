@@ -218,3 +218,31 @@ export interface PaginatedAnimeData {
   };
   pagination: Pagination;
 }
+
+// Types for Schedule Page
+export interface ScheduleAnime {
+    title: string;
+    poster: string;
+    type: string;
+    score: string;
+    estimation: string;
+    genres: string;
+    animeId: string;
+    href: string;
+    samehadakuUrl: string;
+}
+  
+export interface ScheduleDay {
+    day: string;
+    animeList: ScheduleAnime[];
+}
+  
+export interface ScheduleData {
+    status: string;
+    creator: string;
+    message: string;
+    data: {
+      days: ScheduleDay[];
+    };
+    pagination: null;
+}

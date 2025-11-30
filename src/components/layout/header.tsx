@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Clapperboard, Search, Tv } from 'lucide-react';
+import { Clapperboard, Search, Tv, CalendarDays } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
@@ -44,6 +44,12 @@ export default function Header() {
             className="transition-colors hover:text-foreground/80 text-muted-foreground"
           >
             Browse
+          </Link>
+          <Link
+            href="/schedule"
+            className="transition-colors hover:text-foreground/80 text-muted-foreground"
+          >
+            Jadwal
           </Link>
         </nav>
         <div className="flex flex-1 items-center justify-end space-x-4">
