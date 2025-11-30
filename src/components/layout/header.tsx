@@ -10,6 +10,7 @@ import { Button } from '../ui/button';
 import {
   Sheet,
   SheetContent,
+  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { Separator } from '../ui/separator';
@@ -77,6 +78,7 @@ export default function Header() {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="pr-0">
+             <SheetTitle className="sr-only">Menu</SheetTitle>
              <Link href="/" className="mr-6 flex items-center space-x-2 px-6" onClick={handleLinkClick}>
                 <Clapperboard className="h-7 w-7 text-primary" />
                 <span className="font-bold font-headline text-2xl text-primary">
