@@ -15,7 +15,11 @@ export interface Anime {
   href: string;
   samehadakuUrl: string;
   genreList?: Genre[];
+  type?: string;
+  status?: string;
+  score?: string | Score | null; // Allow score to be string or Score object
 }
+
 
 export interface TopAnime extends Anime {
   rank: number;
@@ -184,4 +188,21 @@ export interface ServerUrlData {
         url: string;
     };
     pagination: null;
+}
+
+export interface SearchData {
+  status: string;
+  creator: string;
+  message: string;
+  data: {
+    animeList: Anime[];
+  };
+  pagination: {
+    currentPage: number;
+    hasPrevPage: boolean;
+    prevPage: number | null;
+    hasNextPage: boolean;
+    nextPage: number | null;
+    totalPages: number;
+  };
 }

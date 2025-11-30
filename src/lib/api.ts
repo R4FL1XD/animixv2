@@ -1,4 +1,4 @@
-import type { HomeData, AnimeDetailData, EpisodeDetailData, ServerUrlData } from './types';
+import type { HomeData, AnimeDetailData, EpisodeDetailData, ServerUrlData, SearchData } from './types';
 
 const API_BASE_URL = 'https://www.sankavollerei.com';
 
@@ -94,4 +94,24 @@ export async function getServerUrl(serverId: string): Promise<ServerUrlData | nu
         console.error(`Error fetching server URL for ${serverId}:`, error);
         return null;
     }
+}
+
+export async function searchAnime(query: string, page: number = 1): Promise<SearchData | null> {
+  if (!query) return null;
+  try {
+    const res = await fetch(`${API_BASE_URL}/anime/samehadaku/search?q=${encodeURIComponent(query)}&page=${page}`, {
+      next: { revalidate: 3600 }, // Revalidate every hour
+    });
+
+    if (!res.ok) {
+      console.error(`Failed to search for ${query}:`, res.status, res.statusText);
+      return null;
+    }
+
+    const data: SearchData = await res.json();
+    return data;
+  } catch (error) {
+    console.error(`Error searching for ${query}:`, error);
+    return null;
+  }
 }

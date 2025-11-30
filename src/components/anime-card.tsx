@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Anime } from '@/lib/types';
-import { PlayCircle, Calendar } from 'lucide-react';
+import { PlayCircle, Calendar, Star } from 'lucide-react';
 
 interface AnimeCardProps {
   anime: Anime;
@@ -11,10 +11,13 @@ interface AnimeCardProps {
 
 export default function AnimeCard({ anime }: AnimeCardProps) {
   // Construct the episode ID from the anime ID and episode number
-  const latestEpisodeId = `${anime.animeId}-episode-${anime.episodes}`;
+  const latestEpisodeId = anime.episodes ? `${anime.animeId}-episode-${anime.episodes}` : `${anime.animeId}`;
 
   // If there's an episode number, link to the episode page. Otherwise, link to the anime page.
   const linkHref = anime.episodes ? `/episode/${latestEpisodeId}` : `/anime/${anime.animeId}`;
+
+  const scoreValue = typeof anime.score === 'string' ? anime.score : anime.score?.value;
+
 
   return (
     <Link href={linkHref} className="group block outline-none" tabIndex={0}>
@@ -42,15 +45,26 @@ export default function AnimeCard({ anime }: AnimeCardProps) {
                 Ep {anime.episodes}
             </Badge>
           )}
+           {anime.type && !anime.episodes && (
+             <Badge variant="secondary" className="absolute top-2 left-2 shadow-lg">
+                {anime.type}
+            </Badge>
+          )}
         </CardContent>
-        {(anime.releasedOn || anime.releaseDate) && (
-            <CardFooter className="p-2.5 bg-card/80 text-xs text-muted-foreground border-t">
+         <CardFooter className="p-2.5 bg-card/80 text-xs text-muted-foreground border-t flex justify-between items-center">
+            {(anime.releasedOn || anime.releaseDate || anime.status) && (
                 <div className="flex items-center gap-1.5 truncate">
                     <Calendar className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">{anime.releasedOn || anime.releaseDate}</span>
+                    <span className="truncate">{anime.releasedOn || anime.releaseDate || anime.status}</span>
                 </div>
-            </CardFooter>
-        )}
+            )}
+            {scoreValue && (
+                 <div className="flex items-center gap-1 shrink-0">
+                    <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+                    <span>{scoreValue}</span>
+                </div>
+            )}
+        </CardFooter>
       </Card>
     </Link>
   );
