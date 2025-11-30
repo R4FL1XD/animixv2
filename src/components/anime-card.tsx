@@ -10,8 +10,14 @@ interface AnimeCardProps {
 }
 
 export default function AnimeCard({ anime }: AnimeCardProps) {
+  // Construct the episode ID from the anime ID and episode number
+  const latestEpisodeId = `${anime.animeId}-episode-${anime.episodes}`;
+
+  // If there's an episode number, link to the episode page. Otherwise, link to the anime page.
+  const linkHref = anime.episodes ? `/episode/${latestEpisodeId}` : `/anime/${anime.animeId}`;
+
   return (
-    <Link href={`/anime/${anime.animeId}`} className="group block outline-none" tabIndex={0}>
+    <Link href={linkHref} className="group block outline-none" tabIndex={0}>
       <Card className="h-full w-full overflow-hidden transition-all duration-300 ease-in-out hover:shadow-primary/20 hover:-translate-y-1 focus-visible:shadow-primary/20 focus-visible:-translate-y-1 focus-visible:ring-2 focus-visible:ring-primary ring-offset-2 ring-offset-background">
         <CardContent className="p-0 relative">
           <Image
