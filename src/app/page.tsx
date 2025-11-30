@@ -29,11 +29,11 @@ export default async function Home() {
     <div className="flex flex-col">
       {heroAnime && <HeroSection anime={heroAnime} />}
       <div className="container">
-        <AnimeCarousel title="Recent Releases" animes={recent.animeList} />
+        <AnimeCarousel title="Recent Releases" animes={recent.animeList} viewAllLink="/recent"/>
         
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-x-8">
           <div className="xl:col-span-2">
-            {movie.animeList.length > 0 && <AnimeCarousel title="Movies" animes={movie.animeList} />}
+            {movie.animeList.length > 0 && <AnimeCarousel title="Movies" animes={movie.animeList} viewAllLink="/movies" />}
           </div>
           <div className="xl:col-span-1">
             {top10.animeList.length > 0 && <TopAnimeList animes={top10.animeList} />}

@@ -50,6 +50,12 @@ export default function Header() {
             >
                 Browse
             </Link>
+             <Link
+                href="/movies"
+                className="transition-colors hover:text-primary text-foreground"
+            >
+                Movies
+            </Link>
             <Link
                 href="/recent"
                 className="transition-colors hover:text-primary text-foreground"
@@ -93,6 +99,13 @@ export default function Header() {
                     className="transition-colors hover:text-primary text-foreground"
                 >
                     Browse
+                </Link>
+                <Link
+                    href="/movies"
+                    onClick={handleLinkClick}
+                    className="transition-colors hover:text-primary text-foreground"
+                >
+                    Movies
                 </Link>
                 <Link
                     href="/recent"

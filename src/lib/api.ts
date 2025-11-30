@@ -173,3 +173,22 @@ export async function getScheduleData(): Promise<ScheduleData | null> {
       return null;
     }
   }
+
+export async function getMovies(page: number = 1): Promise<PaginatedAnimeData | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/anime/samehadaku/movies?page=${page}`, {
+      next: { revalidate: 3600 }, // Revalidate every hour
+    });
+
+    if (!res.ok) {
+      console.error('Failed to fetch movies:', res.status, res.statusText);
+      return null;
+    }
+
+    const data: PaginatedAnimeData = await res.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching movies:', error);
+    return null;
+  }
+}
