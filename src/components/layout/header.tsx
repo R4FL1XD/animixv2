@@ -47,45 +47,45 @@ export default function Header() {
             <nav className="flex items-center gap-6 text-sm font-medium">
             <Link
                 href="/browse"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
+                className="transition-colors hover:text-foreground/80 text-foreground"
             >
-                Browse
+                Genre
             </Link>
              <Link
                 href="/movies"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
+                className="transition-colors hover:text-foreground/80 text-foreground"
             >
                 Movies
             </Link>
             <Link
                 href="/recent"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
+                className="transition-colors hover:text-foreground/80 text-foreground"
             >
-                New
+                Recent
             </Link>
             <Link
                 href="/popular"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
+                className="transition-colors hover:text-foreground/80 text-foreground"
             >
                 Popular
             </Link>
             <Link
                 href="/completed"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
+                className="transition-colors hover:text-foreground/80 text-foreground"
             >
                 Completed
             </Link>
             <Link
                 href="/schedule"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
+                className="transition-colors hover:text-foreground/80 text-foreground"
             >
                 Schedule
             </Link>
             <Link
                 href="/all"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
+                className="transition-colors hover:text-foreground/80 text-foreground"
             >
-                All Anime
+                A-Z List
             </Link>
             </nav>
         </div>
@@ -103,7 +103,7 @@ export default function Header() {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="pr-0">
-             <SheetTitle className='sr-only'>Menu</SheetTitle>
+            <SheetTitle className="sr-only">Menu</SheetTitle>
              <Link href="/" className="mr-6 flex items-center space-x-2 px-6" onClick={handleLinkClick}>
                 <Clapperboard className="h-6 w-6 text-primary" />
                 <span className="font-bold text-lg">
@@ -117,7 +117,7 @@ export default function Header() {
                     onClick={handleLinkClick}
                     className="transition-colors hover:text-primary"
                 >
-                    Browse
+                    Genre
                 </Link>
                 <Link
                     href="/movies"
@@ -131,7 +131,7 @@ export default function Header() {
                     onClick={handleLinkClick}
                     className="transition-colors hover:text-primary"
                 >
-                    New
+                    Recent
                 </Link>
                 <Link
                     href="/popular"
@@ -159,7 +159,7 @@ export default function Header() {
                     onClick={handleLinkClick}
                     className="transition-colors hover:text-primary"
                 >
-                    All Anime
+                    A-Z List
                 </Link>
             </div>
           </SheetContent>
@@ -176,21 +176,24 @@ export default function Header() {
 
 
         <div className="flex flex-1 items-center justify-end space-x-2">
-          <form
-            onSubmit={handleSearch}
-            className="w-full flex-1 md:w-auto md:flex-none"
-          >
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search..."
-                className="pl-9 w-full md:w-48 lg:w-64"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </form>
+            <form onSubmit={handleSearch} className="relative w-full max-w-xs">
+                <Input
+                    type="search"
+                    placeholder="Search..."
+                    className="h-9 w-full rounded-full border-2 border-border bg-background/50 pl-4 pr-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <Button
+                    type="submit"
+                    size="icon"
+                    variant="ghost"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full text-muted-foreground"
+                >
+                    <Search className="h-4 w-4" />
+                    <span className="sr-only">Search</span>
+                </Button>
+            </form>
           <ThemeToggle />
         </div>
       </div>
