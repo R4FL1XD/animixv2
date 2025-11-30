@@ -192,3 +192,22 @@ export async function getMovies(page: number = 1): Promise<PaginatedAnimeData | 
     return null;
   }
 }
+
+export async function getPopularAnime(page: number = 1): Promise<PaginatedAnimeData | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/anime/samehadaku/popular?page=${page}`, {
+      next: { revalidate: 3600 }, // Revalidate every hour
+    });
+
+    if (!res.ok) {
+      console.error('Failed to fetch popular anime:', res.status, res.statusText);
+      return null;
+    }
+
+    const data: PaginatedAnimeData = await res.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching popular anime:', error);
+    return null;
+  }
+}
