@@ -1,8 +1,10 @@
-import { getEpisodeDetails } from '@/lib/api';
-import { notFound } from 'next/navigation';
+'use client';
+
+import { getEpisodeDetails, getServerUrl } from '@/lib/api';
+import { notFound, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, Download, Server } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, Server, Loader2 } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
@@ -12,21 +14,61 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AnimeCarousel from '@/components/anime-carousel';
+import type { EpisodeDetail } from '@/lib/types';
+import { useState, useEffect } from 'react';
 
-interface EpisodeDetailPageProps {
-  params: {
-    id: string;
+export default function EpisodeDetailPage() {
+  const params = useParams();
+  const { id } = params;
+
+  const [episodeDetails, setEpisodeDetails] = useState<EpisodeDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [streamingUrl, setStreamingUrl] = useState('');
+  const [loadingStream, setLoadingStream] = useState(false);
+  const [activeServerId, setActiveServerId] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchDetails() {
+      if (typeof id !== 'string') return;
+      setLoading(true);
+      const details = await getEpisodeDetails(id);
+      if (!details || !details.data) {
+        notFound();
+        return;
+      }
+      setEpisodeDetails(details.data);
+      setStreamingUrl(details.data.defaultStreamingUrl);
+      setActiveServerId(details.data.defaultStreamingUrl);
+      setLoading(false);
+    }
+    fetchDetails();
+  }, [id]);
+
+  const handleServerClick = async (serverId: string, serverTitle: string) => {
+    if (serverTitle.toLowerCase().includes('blogspot')) {
+        setStreamingUrl(serverId);
+        setActiveServerId(serverId);
+        return;
+    }
+    
+    setLoadingStream(true);
+    setActiveServerId(serverId);
+    const serverData = await getServerUrl(serverId);
+    if (serverData && serverData.data.url) {
+      setStreamingUrl(serverData.data.url);
+    } else {
+      // Handle error, maybe show a toast
+      console.error('Failed to get server URL');
+    }
+    setLoadingStream(false);
   };
-}
-
-export default async function EpisodeDetailPage({ params }: EpisodeDetailPageProps) {
-  const episodeDetails = await getEpisodeDetails(params.id);
-
-  if (!episodeDetails || !episodeDetails.data) {
-    notFound();
+  
+  if (loading || !episodeDetails) {
+    // You can return a loading skeleton here
+    return <div className="container flex justify-center items-center h-screen"><Loader2 className="h-16 w-16 animate-spin" /></div>;
   }
-
-  const { data: episode } = episodeDetails;
+  
+  const episode = episodeDetails;
 
   return (
     <div className="container py-8 md:py-12">
@@ -39,12 +81,19 @@ export default async function EpisodeDetailPage({ params }: EpisodeDetailPagePro
       <h1 className="text-3xl md:text-4xl font-headline font-bold mb-2">{episode.title}</h1>
       <p className="text-muted-foreground mb-6">Released: {episode.releasedOn}</p>
 
-      <div className="aspect-video bg-black rounded-lg overflow-hidden mb-6">
-        <iframe
-          src={episode.defaultStreamingUrl}
-          allowFullScreen
-          className="w-full h-full border-0"
-        ></iframe>
+      <div className="aspect-video bg-black rounded-lg overflow-hidden mb-6 relative">
+        {loadingStream ? (
+           <div className="flex justify-center items-center h-full w-full bg-black">
+                <Loader2 className="h-12 w-12 animate-spin text-white" />
+           </div>
+        ) : (
+            <iframe
+            key={streamingUrl} // Re-render iframe when URL changes
+            src={streamingUrl}
+            allowFullScreen
+            className="w-full h-full border-0"
+            ></iframe>
+        )}
       </div>
 
       <div className="flex justify-between items-center mb-8">
@@ -114,8 +163,14 @@ export default async function EpisodeDetailPage({ params }: EpisodeDetailPagePro
                                         <h3 className="font-semibold text-lg mb-2">{quality.title}</h3>
                                         <div className="flex flex-wrap gap-2">
                                             {quality.serverList.map(server => (
-                                                <Button key={server.serverId} variant="outline" asChild>
-                                                    <a href={server.href} target="_blank" rel="noopener noreferrer">{server.title}</a>
+                                                <Button 
+                                                    key={server.serverId} 
+                                                    variant={activeServerId === server.serverId ? 'default' : 'outline'}
+                                                    onClick={() => handleServerClick(server.serverId, server.title)}
+                                                    disabled={loadingStream && activeServerId === server.serverId}
+                                                >
+                                                     {loadingStream && activeServerId === server.serverId && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                    {server.title}
                                                 </Button>
                                             ))}
                                         </div>

@@ -175,3 +175,13 @@ export interface EpisodeDetailData {
     message: string;
     data: EpisodeDetail;
 }
+
+export interface ServerUrlData {
+    status: string;
+    creator: string;
+    message: string;
+    data: {
+        url: string;
+    };
+    pagination: null;
+}

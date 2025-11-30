@@ -1,4 +1,4 @@
-import type { HomeData, AnimeDetailData, EpisodeDetailData } from './types';
+import type { HomeData, AnimeDetailData, EpisodeDetailData, ServerUrlData } from './types';
 
 const API_BASE_URL = 'https://www.sankavollerei.com';
 
@@ -64,6 +64,34 @@ export async function getEpisodeDetails(episodeId: string): Promise<EpisodeDetai
         return data;
     } catch (error) {
         console.error(`Error fetching episode details for ${episodeId}:`, error);
+        return null;
+    }
+}
+
+export async function getServerUrl(serverId: string): Promise<ServerUrlData | null> {
+    if (!serverId) return null;
+    // Blogspot links don't use this endpoint, they are direct URLs.
+    if (serverId.toLowerCase().includes('blogspot')) {
+        return {
+            status: 'success',
+            creator: 'Sanka Vollerei',
+            message: 'Direct URL',
+            data: { url: serverId },
+            pagination: null
+        };
+    }
+    try {
+        const res = await fetch(`${API_BASE_URL}/anime/samehadaku/server/${serverId}`);
+
+        if (!res.ok) {
+            console.error(`Failed to fetch server URL for ${serverId}:`, res.status, res.statusText);
+            return null;
+        }
+
+        const data: ServerUrlData = await res.json();
+        return data;
+    } catch (error) {
+        console.error(`Error fetching server URL for ${serverId}:`, error);
         return null;
     }
 }
