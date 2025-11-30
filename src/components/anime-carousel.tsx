@@ -16,7 +16,7 @@ export default function AnimeCarousel({ title, animes, viewAllLink }: AnimeCarou
 
   return (
     <section className="py-8 md:py-12">
-      <div className="flex justify-between items-center mb-6 px-4 md:px-0">
+      <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl md:text-3xl font-bold font-headline">
           {title}
         </h2>
