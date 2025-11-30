@@ -28,6 +28,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'v1.samehadaku.jpeg',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };
