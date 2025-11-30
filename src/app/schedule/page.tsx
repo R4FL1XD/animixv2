@@ -14,7 +14,7 @@ export default async function SchedulePage() {
           <Terminal className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>
-            Gagal memuat jadwal. API mungkin sedang tidak aktif atau ada masalah jaringan. Silakan coba lagi nanti.
+            Failed to load schedule. The API might be down or there was a network issue. Please try again later.
           </AlertDescription>
         </Alert>
       </div>
@@ -27,7 +27,7 @@ export default async function SchedulePage() {
   return (
     <div className="container py-8 md:py-12">
       <h1 className="text-3xl md:text-4xl font-headline font-bold mb-8">
-        Jadwal Rilis Mingguan
+        Weekly Release Schedule
       </h1>
 
       <Tabs defaultValue={today} className="w-full">
@@ -48,7 +48,7 @@ export default async function SchedulePage() {
                     ))}
                 </div>
             ) : (
-                <p className="text-muted-foreground text-center py-10">Tidak ada jadwal rilis untuk hari ini.</p>
+                <p className="text-muted-foreground text-center py-10">No release schedule for today.</p>
             )}
           </TabsContent>
         ))}

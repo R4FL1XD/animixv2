@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { ScheduleAnime } from '@/lib/types';
 import { Clock, Star, Tag } from 'lucide-react';
@@ -16,7 +16,7 @@ export default function ScheduleAnimeCard({ anime }: ScheduleAnimeCardProps) {
 
   return (
     <Link href={linkHref} className="group block outline-none" tabIndex={0}>
-      <Card className="flex h-full w-full overflow-hidden transition-all duration-300 ease-in-out hover:shadow-primary/20 hover:bg-card/95 focus-visible:shadow-primary/20 focus-visible:ring-2 focus-visible:ring-primary ring-offset-2 ring-offset-background">
+      <Card className="flex h-full w-full overflow-hidden transition-all duration-300 ease-in-out hover:shadow-lg hover:bg-card/95 focus-visible:shadow-lg focus-visible:ring-2 focus-visible:ring-primary ring-offset-2 ring-offset-background">
         <div className="relative w-1/3 shrink-0">
           <Image
             src={anime.poster || '/placeholder.jpg'}
@@ -41,9 +41,9 @@ export default function ScheduleAnimeCard({ anime }: ScheduleAnimeCardProps) {
             </div>
             
             <div className="mt-3 space-y-2 text-sm">
-                <div className="flex items-center gap-2">
-                    <Badge variant={isUpdating ? 'destructive' : 'secondary'}>
-                        <Clock className="mr-1.5 h-3 w-3"/>
+                <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant={isUpdating ? 'destructive' : 'secondary'} className="gap-1.5">
+                        <Clock className="h-3 w-3"/>
                         {anime.estimation}
                     </Badge>
                     {anime.score && (
