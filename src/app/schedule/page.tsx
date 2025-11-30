@@ -31,9 +31,9 @@ export default async function SchedulePage() {
       </h1>
 
       <Tabs defaultValue={today} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-7 mb-6">
+        <TabsList className="flex flex-wrap h-auto justify-start mb-6">
           {days.map((day) => (
-            <TabsTrigger key={day.day} value={day.day}>
+            <TabsTrigger key={day.day} value={day.day} className="flex-grow">
               {day.day}
             </TabsTrigger>
           ))}
