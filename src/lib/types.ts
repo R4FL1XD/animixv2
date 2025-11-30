@@ -190,6 +190,15 @@ export interface ServerUrlData {
     pagination: null;
 }
 
+interface Pagination {
+  currentPage: number;
+  hasPrevPage: boolean;
+  prevPage: number | null;
+  hasNextPage: boolean;
+  nextPage: number | null;
+  totalPages: number;
+}
+
 export interface SearchData {
   status: string;
   creator: string;
@@ -197,12 +206,15 @@ export interface SearchData {
   data: {
     animeList: Anime[];
   };
-  pagination: {
-    currentPage: number;
-    hasPrevPage: boolean;
-    prevPage: number | null;
-    hasNextPage: boolean;
-    nextPage: number | null;
-    totalPages: number;
+  pagination: Pagination;
+}
+
+export interface PaginatedAnimeData {
+  status: string;
+  creator: string;
+  message: string;
+  data: {
+    animeList: Anime[];
   };
+  pagination: Pagination;
 }

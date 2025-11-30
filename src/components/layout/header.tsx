@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Clapperboard, Search } from 'lucide-react';
+import { Clapperboard, Search, Tv } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
@@ -32,6 +32,12 @@ export default function Header() {
             className="transition-colors hover:text-foreground/80 text-foreground font-medium"
           >
             Home
+          </Link>
+           <Link
+            href="/recent"
+            className="transition-colors hover:text-foreground/80 text-muted-foreground"
+          >
+            Recent
           </Link>
           <Link
             href="/browse"

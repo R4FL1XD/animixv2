@@ -1,4 +1,4 @@
-import type { HomeData, AnimeDetailData, EpisodeDetailData, ServerUrlData, SearchData } from './types';
+import type { HomeData, AnimeDetailData, EpisodeDetailData, ServerUrlData, SearchData, PaginatedAnimeData } from './types';
 
 const API_BASE_URL = 'https://www.sankavollerei.com';
 
@@ -112,6 +112,25 @@ export async function searchAnime(query: string, page: number = 1): Promise<Sear
     return data;
   } catch (error) {
     console.error(`Error searching for ${query}:`, error);
+    return null;
+  }
+}
+
+export async function getRecentAnime(page: number = 1): Promise<PaginatedAnimeData | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/anime/samehadaku/recent?page=${page}`, {
+      next: { revalidate: 1800 }, // Revalidate every 30 minutes
+    });
+
+    if (!res.ok) {
+      console.error('Failed to fetch recent anime:', res.status, res.statusText);
+      return null;
+    }
+
+    const data: PaginatedAnimeData = await res.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching recent anime:', error);
     return null;
   }
 }
