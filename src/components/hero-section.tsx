@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { Anime } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Play, Info, Loader2 } from 'lucide-react';
+import { Play, Info } from 'lucide-react';
 import { getAnimeDetails } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { useState, useRef } from 'react';
@@ -18,7 +18,6 @@ interface HeroSectionProps {
 
 export default function HeroSection({ animes }: HeroSectionProps) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState<string | null>(null);
   const plugin = useRef(
     Autoplay({ delay: 5000, stopOnInteraction: true })
   );
@@ -26,7 +25,6 @@ export default function HeroSection({ animes }: HeroSectionProps) {
   if (!animes || animes.length === 0) return null;
 
   const handlePlayClick = async (animeId: string) => {
-    setIsLoading(animeId);
     try {
         const animeDetails = await getAnimeDetails(animeId);
         if (animeDetails?.data?.episodeList?.[0]?.episodeId) {
@@ -38,8 +36,6 @@ export default function HeroSection({ animes }: HeroSectionProps) {
     } catch (error) {
         console.error("Failed to get anime details:", error);
         router.push(`/anime/${animeId}`); // Fallback
-    } finally {
-        setIsLoading(null);
     }
   };
 
@@ -82,12 +78,8 @@ export default function HeroSection({ animes }: HeroSectionProps) {
                     </p>
                   )}
                   <div className="mt-8 flex flex-wrap gap-4">
-                    <Button onClick={() => handlePlayClick(anime.animeId)} disabled={isLoading === anime.animeId} size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg rounded-full px-8">
-                      {isLoading === anime.animeId ? (
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      ) : (
+                    <Button onClick={() => handlePlayClick(anime.animeId)} size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg rounded-full px-8">
                         <Play className="mr-2 h-5 w-5 fill-current" />
-                      )}
                       Play Now
                     </Button>
                     <Button asChild size="lg" variant="secondary" className="shadow-lg rounded-full px-8">

@@ -4,54 +4,76 @@ import Image from 'next/image';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Anime } from '@/lib/types';
-import { PlayCircle, Calendar, Star, Tag } from 'lucide-react';
+import { PlayCircle, Calendar, Star } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { getAnimeDetails } from '@/lib/api';
+import Link from 'next/link';
+import React from 'react';
 
 interface AnimeCardProps {
   anime: Anime;
 }
 
-function AnimeCardContent({ anime }: { anime: Anime }) {
-    const scoreValue = typeof anime.score === 'string' ? anime.score : anime.score?.value;
+// Sub-component to handle the click logic and navigation
+function AnimeCardLink({ anime, children }: { anime: Anime, children: React.ReactNode }) {
     const router = useRouter();
 
-    const handleClick = async (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+        // Prevent default link behavior to handle navigation manually
         e.preventDefault();
-        e.stopPropagation();
 
+        // This handles recommended episodes, which have a different data structure
         if (anime.episodeId) {
             const correctEpisodeId = anime.href.split('/').pop();
             if (correctEpisodeId) {
                 router.push(`/episode/${correctEpisodeId}`);
-                return;
             }
+            return;
         }
-        
+
+        // This handles regular anime cards
         if (anime.animeId) {
             try {
                 const animeDetails = await getAnimeDetails(anime.animeId);
+                // Navigate to the latest episode if it exists
                 if (animeDetails?.data?.episodeList?.[0]?.episodeId) {
                     const latestEpisodeId = animeDetails.data.episodeList[0].episodeId;
                     router.push(`/episode/${latestEpisodeId}`);
                 } else {
+                    // Fallback to anime detail page if no episodes are found
                     router.push(`/anime/${anime.animeId}`);
                 }
             } catch (error) {
                 console.error("Failed to get details for navigation", error);
+                // Fallback navigation if API fails
                 router.push(`/anime/${anime.animeId}`);
             }
         }
     };
     
+    // The href is a fallback for right-click/middle-click functionality
+    const fallbackHref = anime.episodeId 
+        ? `/episode/${anime.href.split('/').pop()}` 
+        : `/anime/${anime.animeId}`;
+
     return (
-        <div 
+        <Link 
+            href={fallbackHref}
             onClick={handleClick}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClick(e as any); }}
-            role="button"
-            tabIndex={0}
             className="group block outline-none cursor-pointer w-full h-full"
+            aria-label={`Play ${anime.title}`}
         >
+           {children}
+        </Link>
+    );
+}
+
+
+function AnimeCard({ anime }: AnimeCardProps) {
+    const scoreValue = typeof anime.score === 'string' ? anime.score : anime.score?.value;
+    
+    return (
+        <AnimeCardLink anime={anime}>
             <Card className="h-full w-full overflow-hidden transition-all duration-300 ease-in-out group-hover:shadow-primary/20 group-hover:-translate-y-1 group-focus-visible:shadow-primary/20 group-focus-visible:-translate-y-1 group-focus-visible:ring-2 group-focus-visible:ring-primary ring-offset-2 ring-offset-background">
                 <CardContent className="p-0 relative">
                     <Image
@@ -118,10 +140,8 @@ function AnimeCardContent({ anime }: { anime: Anime }) {
                     )}
                 </CardFooter>
             </Card>
-        </div>
+        </AnimeCardLink>
     );
 }
 
-export default function AnimeCard({ anime }: AnimeCardProps) {
-    return <AnimeCardContent anime={anime} />;
-}
+export default AnimeCard;
