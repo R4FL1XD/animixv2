@@ -19,15 +19,17 @@ export default function AnimeCard({ anime }: AnimeCardProps) {
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
 
-    // This handles recommended episodes which have episodeId in animeId field.
-    if (anime.animeId.includes('-episode-')) {
-        router.push(`/episode/${anime.animeId}`);
+    const targetId = anime.episodeId || anime.animeId;
+    if (!targetId) return;
+
+    // This handles recommended episodes which have episodeId
+    if (targetId.includes('-episode-')) {
+        router.push(`/episode/${targetId}`);
         return; 
     }
     
     // For anything else, navigate to the anime detail page.
-    // The detail page can handle fetching its own data or finding the latest episode.
-    router.push(`/anime/${anime.animeId}`);
+    router.push(`/anime/${targetId}`);
   };
 
 
