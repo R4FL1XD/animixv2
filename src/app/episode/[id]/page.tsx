@@ -58,18 +58,22 @@ export default function EpisodeDetailPage() {
       }
       setEpisodeDetails(details.data);
       
-      // Use the default streaming URL on initial load
       if (details.data.defaultStreamingUrl) {
           setStreamingUrl(details.data.defaultStreamingUrl);
       }
       
-      // Find the initial active server (likely blogspot) to highlight it
       const initialServer = details.data.server.qualities
         .flatMap(q => q.serverList)
         .find(s => s.title.toLowerCase().includes('blogspot'));
 
       if (initialServer) {
         setActiveServerId(initialServer.serverId);
+      } else {
+        const firstServer = details.data.server.qualities.find(q => q.serverList.length > 0)?.serverList[0];
+        if (firstServer) {
+          setActiveServerId(firstServer.serverId);
+          handleServerClick(firstServer.serverId, firstServer.title);
+        }
       }
 
       if (details.data.animeId) {
@@ -88,30 +92,29 @@ export default function EpisodeDetailPage() {
     setLoadingStream(true);
     setActiveServerId(serverId);
     
+    if (serverTitle.toLowerCase().includes('blogspot') && episodeDetails?.defaultStreamingUrl) {
+        setStreamingUrl(episodeDetails.defaultStreamingUrl);
+        setLoadingStream(false);
+        return; 
+    }
+
     try {
-        // If it's a blogspot server, use the default URL directly.
-        if (serverTitle.toLowerCase().includes('blogspot') && episodeDetails?.defaultStreamingUrl) {
-            setStreamingUrl(episodeDetails.defaultStreamingUrl);
+        const serverData = await getServerUrl(serverId);
+        if (serverData && serverData.data.url) {
+          setStreamingUrl(serverData.data.url);
         } else {
-            // For other servers, fetch the URL
-            const serverData = await getServerUrl(serverId);
-            if (serverData && serverData.data.url) {
-              setStreamingUrl(serverData.data.url);
-            } else {
-              console.error('Failed to get server URL, serverData is null or missing url');
-              setStreamingUrl(''); // Clear url on failure
-            }
+          console.error('Failed to get server URL, serverData is null or missing url');
+          setStreamingUrl('');
         }
     } catch(e) {
         console.error('Error fetching server URL:', e);
-        setStreamingUrl(''); // Clear url on error
+        setStreamingUrl('');
     } finally {
         setLoadingStream(false);
     }
   };
   
   if (loading || !episodeDetails) {
-    // You can return a loading skeleton here
     return <div className="container flex justify-center items-center h-screen"><Loader2 className="h-16 w-16 animate-spin" /></div>;
   }
   
@@ -137,7 +140,7 @@ export default function EpisodeDetailPage() {
            </div>
         ) : streamingUrl ? (
             <iframe
-            key={streamingUrl} // Re-render iframe when URL changes
+            key={streamingUrl}
             src={streamingUrl}
             allowFullScreen
             className="w-full h-full border-0"
@@ -247,5 +250,3 @@ export default function EpisodeDetailPage() {
     </div>
   );
 }
-
-    
