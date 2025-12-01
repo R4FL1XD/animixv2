@@ -59,12 +59,12 @@ export default function EpisodeDetailPage() {
       
       const initialServer = details.data.server.qualities[0]?.serverList[0];
       if (initialServer) {
-        if(initialServer.title.toLowerCase().includes('blogspot')) {
+        setActiveServerId(initialServer.serverId);
+        if (initialServer.title.toLowerCase().includes('blogspot')) {
           setStreamingUrl(initialServer.serverId);
         } else {
           setStreamingUrl(details.data.defaultStreamingUrl);
         }
-        setActiveServerId(initialServer.serverId);
       } else {
         setStreamingUrl(details.data.defaultStreamingUrl);
       }
@@ -85,20 +85,21 @@ export default function EpisodeDetailPage() {
     setLoadingStream(true);
     setActiveServerId(serverId);
 
-    // Blogspot links are direct URLs, no need to fetch from API
     if (serverTitle.toLowerCase().includes('blogspot')) {
         setStreamingUrl(serverId);
         setLoadingStream(false);
         return;
     }
     
-    const serverData = await getServerUrl(serverId);
-    if (serverData && serverData.data.url) {
-      setStreamingUrl(serverData.data.url);
-    } else {
-      // Handle error, maybe show a toast
-      console.error('Failed to get server URL');
-      // Optionally, set a message in the iframe or show a toast
+    try {
+        const serverData = await getServerUrl(serverId);
+        if (serverData && serverData.data.url) {
+          setStreamingUrl(serverData.data.url);
+        } else {
+          console.error('Failed to get server URL, serverData is null or missing url');
+        }
+    } catch(e) {
+        console.error('Error fetching server URL:', e);
     }
     setLoadingStream(false);
   };
