@@ -12,7 +12,6 @@ export interface Anime {
   releasedOn?: string;
   releaseDate?: string;
   animeId: string;
-  episodeId?: string; // Add optional episodeId for recommended episodes
   href: string;
   samehadakuUrl: string;
   genreList?: Genre[];

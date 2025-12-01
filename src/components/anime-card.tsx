@@ -17,18 +17,16 @@ function AnimeCard({ anime }: AnimeCardProps) {
     const router = useRouter();
     const scoreValue = typeof anime.score === 'string' ? anime.score : anime.score?.value;
     
-    // Default link is to the anime detail page. The play button will override this.
-    const linkHref = anime.episodeId && anime.href?.includes('/episode/')
-        ? `/episode/${anime.href.split('/').pop()}`
-        : `/anime/${anime.animeId}`;
+    // Fallback link to the anime detail page. The play button will override this.
+    const linkHref = `/anime/${anime.animeId}`;
 
     const handlePlayClick = async (e: React.MouseEvent) => {
         // Prevent the underlying Link from navigating
         e.preventDefault();
         e.stopPropagation();
 
-        // If it's already an episode link, just go there.
-        if (anime.episodeId && anime.href?.includes('/episode/')) {
+        // If the href contains '/episode/', it's a direct episode link (like from recommendations)
+        if (anime.href && anime.href.includes('/episode/')) {
              const episodeId = anime.href.split('/').pop();
              if (episodeId) {
                 router.push(`/episode/${episodeId}`);
@@ -36,18 +34,19 @@ function AnimeCard({ anime }: AnimeCardProps) {
              return;
         }
 
-        // Otherwise, find the latest episode and navigate
+        // Otherwise, it's a general anime. Fetch details to find the latest episode.
         try {
             const animeDetails = await getAnimeDetails(anime.animeId);
+            // The latest episode is usually the first in the list
             if (animeDetails?.data?.episodeList?.[0]?.episodeId) {
                 const latestEpisodeId = animeDetails.data.episodeList[0].episodeId;
                 router.push(`/episode/${latestEpisodeId}`);
             } else {
-                router.push(`/anime/${anime.animeId}`); // Fallback
+                router.push(linkHref); // Fallback to detail page if no episodes found
             }
         } catch (error) {
             console.error("Failed to get anime details:", error);
-            router.push(`/anime/${anime.animeId}`); // Fallback
+            router.push(linkHref); // Fallback on error
         }
     };
 
