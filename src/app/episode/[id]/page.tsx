@@ -56,9 +56,19 @@ export default function EpisodeDetailPage() {
         return;
       }
       setEpisodeDetails(details.data);
-      setStreamingUrl(details.data.defaultStreamingUrl);
-      setActiveServerId(details.data.defaultStreamingUrl);
       
+      const initialServer = details.data.server.qualities[0]?.serverList[0];
+      if (initialServer) {
+        if(initialServer.title.toLowerCase().includes('blogspot')) {
+          setStreamingUrl(initialServer.serverId);
+        } else {
+          setStreamingUrl(details.data.defaultStreamingUrl);
+        }
+        setActiveServerId(initialServer.serverId);
+      } else {
+        setStreamingUrl(details.data.defaultStreamingUrl);
+      }
+
       if (details.data.animeId) {
         const animeData = await getAnimeDetails(details.data.animeId);
         if (animeData?.data) {
@@ -72,20 +82,23 @@ export default function EpisodeDetailPage() {
   }, [id]);
 
   const handleServerClick = async (serverId: string, serverTitle: string) => {
+    setLoadingStream(true);
+    setActiveServerId(serverId);
+
+    // Blogspot links are direct URLs, no need to fetch from API
     if (serverTitle.toLowerCase().includes('blogspot')) {
         setStreamingUrl(serverId);
-        setActiveServerId(serverId);
+        setLoadingStream(false);
         return;
     }
     
-    setLoadingStream(true);
-    setActiveServerId(serverId);
     const serverData = await getServerUrl(serverId);
     if (serverData && serverData.data.url) {
       setStreamingUrl(serverData.data.url);
     } else {
       // Handle error, maybe show a toast
       console.error('Failed to get server URL');
+      // Optionally, set a message in the iframe or show a toast
     }
     setLoadingStream(false);
   };
@@ -144,47 +157,17 @@ export default function EpisodeDetailPage() {
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-            <Tabs defaultValue="downloads" className="w-full">
+            <Tabs defaultValue="streaming" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="downloads"><Download className="mr-2"/> Download Links</TabsTrigger>
                     <TabsTrigger value="streaming"><Server className="mr-2"/> Streaming Servers</TabsTrigger>
+                    <TabsTrigger value="downloads"><Download className="mr-2"/> Download Links</TabsTrigger>
                 </TabsList>
-                <TabsContent value="downloads">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Download Options</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <Accordion type="single" collapsible className="w-full">
-                                {episode.downloadUrl.formats.map((format, formatIndex) => (
-                                    <AccordionItem value={`format-${formatIndex}`} key={`format-${formatIndex}`}>
-                                        <AccordionTrigger>{format.title}</AccordionTrigger>
-                                        <AccordionContent>
-                                            {format.qualities.map((quality, qualityIndex) => (
-                                                <div key={`q-${qualityIndex}`} className="mb-4 last:mb-0">
-                                                    <h4 className="font-semibold mb-2">{quality.title}</h4>
-                                                    <div className="flex flex-wrap gap-2">
-                                                        {quality.urls.map((url, urlIndex) => (
-                                                            <Button asChild variant="secondary" size="sm" key={`url-${urlIndex}`}>
-                                                                <a href={url.url} target="_blank" rel="noopener noreferrer">{url.title}</a>
-                                                            </Button>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </AccordionContent>
-                                    </AccordionItem>
-                                ))}
-                            </Accordion>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-                <TabsContent value="streaming">
+                 <TabsContent value="streaming">
                      <Card>
                         <CardHeader>
                             <CardTitle>Streaming Servers</CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="pt-6">
                             <div className="space-y-4">
                             {episode.server.qualities.map((quality, qualityIndex) => (
                                 quality.serverList.length > 0 && (
@@ -210,11 +193,41 @@ export default function EpisodeDetailPage() {
                         </CardContent>
                     </Card>
                 </TabsContent>
+                <TabsContent value="downloads">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Download Options</CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-6">
+                            <Accordion type="single" collapsible className="w-full">
+                                {episode.downloadUrl.formats.map((format, formatIndex) => (
+                                    <AccordionItem value={`format-${formatIndex}`} key={`format-${formatIndex}`}>
+                                        <AccordionTrigger>{format.title}</AccordionTrigger>
+                                        <AccordionContent>
+                                            {format.qualities.map((quality, qualityIndex) => (
+                                                <div key={`q-${qualityIndex}`} className="mb-4 last:mb-0">
+                                                    <h4 className="font-semibold mb-2">{quality.title}</h4>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {quality.urls.map((url, urlIndex) => (
+                                                            <Button asChild variant="secondary" size="sm" key={`url-${urlIndex}`}>
+                                                                <a href={url.url} target="_blank" rel="noopener noreferrer">{url.title}</a>
+                                                            </Button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                ))}
+                            </Accordion>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
             </Tabs>
         </div>
         <div className="lg:col-span-1">
           {episode.recommendedEpisodeList && episode.recommendedEpisodeList.length > 0 && (
-             <div className="-mt-8">
+             <div className="pt-8">
                 <AnimeCarousel title="Recommended Episodes" animes={episode.recommendedEpisodeList} />
              </div>
           )}
