@@ -57,11 +57,15 @@ export default function EpisodeDetailPage() {
       }
       setEpisodeDetails(details.data);
       
-      const initialServer = details.data.server.qualities[0]?.serverList[0];
-      if (initialServer) {
-        handleServerClick(initialServer.serverId);
-      } else {
-        setStreamingUrl(details.data.defaultStreamingUrl);
+      // Use the default streaming URL on initial load
+      if (details.data.defaultStreamingUrl) {
+          setStreamingUrl(details.data.defaultStreamingUrl);
+      }
+      
+      // Find the initial active server to highlight it
+      const initialServer = details.data.server.qualities.flatMap(q => q.serverList).find(s => s);
+      if(initialServer) {
+        setActiveServerId(initialServer.serverId);
       }
 
       if (details.data.animeId) {
@@ -81,6 +85,7 @@ export default function EpisodeDetailPage() {
     setActiveServerId(serverId);
     
     try {
+        // Always fetch from getServerUrl, for any server type
         const serverData = await getServerUrl(serverId);
         if (serverData && serverData.data.url) {
           setStreamingUrl(serverData.data.url);
