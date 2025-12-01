@@ -1,22 +1,36 @@
+"use client";
+
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Anime } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Play, Info } from 'lucide-react';
+import { Play, Info, Loader2 } from 'lucide-react';
+import { getAnimeDetails } from '@/lib/api';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 interface HeroSectionProps {
   anime: Anime;
 }
 
 export default function HeroSection({ anime }: HeroSectionProps) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
   if (!anime) return null;
 
-  // Construct the episode ID from the anime ID and episode number
-  const latestEpisodeId = anime.episodes ? `${anime.animeId}-episode-${anime.episodes}` : `${anime.animeId}`;
-
-  // If there's an episode number, link to the episode page. Otherwise, link to the anime page.
-  const linkHref = anime.episodes ? `/episode/${latestEpisodeId}` : `/anime/${anime.animeId}`;
-
+  const handlePlayClick = async () => {
+    setIsLoading(true);
+    const animeDetails = await getAnimeDetails(anime.animeId);
+    if (animeDetails?.data?.episodeList?.[0]?.episodeId) {
+      const latestEpisodeId = animeDetails.data.episodeList[0].episodeId;
+      router.push(`/episode/${latestEpisodeId}`);
+    } else {
+      // Fallback or show an error
+      router.push(`/anime/${anime.animeId}`);
+    }
+    setIsLoading(false);
+  };
 
   return (
     <section className="relative h-[50vh] md:h-[70vh] w-full">
@@ -45,11 +59,13 @@ export default function HeroSection({ anime }: HeroSectionProps) {
             </p>
           )}
           <div className="mt-8 flex flex-wrap gap-4">
-            <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg rounded-full px-8">
-              <Link href={linkHref}>
+            <Button onClick={handlePlayClick} disabled={isLoading} size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg rounded-full px-8">
+              {isLoading ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
                 <Play className="mr-2 h-5 w-5 fill-current" />
-                Play Now
-              </Link>
+              )}
+              Play Now
             </Button>
             <Button asChild size="lg" variant="secondary" className="shadow-lg rounded-full px-8">
               <Link href={`/anime/${anime.animeId}`}>

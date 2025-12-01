@@ -1,26 +1,44 @@
+"use client";
+
 import Image from 'next/image';
-import Link from 'next/link';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Anime } from '@/lib/types';
-import { PlayCircle, Calendar, Star } from 'lucide-react';
+import { PlayCircle, Calendar, Star, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { getAnimeDetails } from '@/lib/api';
 
 interface AnimeCardProps {
   anime: Anime;
 }
 
 export default function AnimeCard({ anime }: AnimeCardProps) {
-  // Construct the episode ID from the anime ID and episode number
-  const latestEpisodeId = anime.episodes ? `${anime.animeId}-episode-${anime.episodes}` : `${anime.animeId}`;
-
-  // If there's an episode number, link to the episode page. Otherwise, link to the anime page.
-  const linkHref = anime.episodes ? `/episode/${latestEpisodeId}` : `/anime/${anime.animeId}`;
-
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  
   const scoreValue = typeof anime.score === 'string' ? anime.score : anime.score?.value;
+
+  const handleClick = async (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    if (anime.episodes) {
+      const animeDetails = await getAnimeDetails(anime.animeId);
+      if (animeDetails?.data?.episodeList?.[0]?.episodeId) {
+        const latestEpisodeId = animeDetails.data.episodeList[0].episodeId;
+        router.push(`/episode/${latestEpisodeId}`);
+      } else {
+        router.push(`/anime/${anime.animeId}`);
+      }
+    } else {
+      router.push(`/anime/${anime.animeId}`);
+    }
+  };
 
 
   return (
-    <Link href={linkHref} className="group block outline-none" tabIndex={0}>
+    <div onClick={handleClick} className="group block outline-none cursor-pointer" tabIndex={0}>
       <Card className="h-full w-full overflow-hidden transition-all duration-300 ease-in-out hover:shadow-primary/20 hover:-translate-y-1 focus-visible:shadow-primary/20 focus-visible:-translate-y-1 focus-visible:ring-2 focus-visible:ring-primary ring-offset-2 ring-offset-background">
         <CardContent className="p-0 relative">
           <Image
@@ -33,7 +51,11 @@ export default function AnimeCard({ anime }: AnimeCardProps) {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300 bg-black/40">
-            <PlayCircle className="h-16 w-16 text-white/90 drop-shadow-lg" />
+            {isLoading ? (
+              <Loader2 className="h-16 w-16 text-white/90 animate-spin" />
+            ) : (
+              <PlayCircle className="h-16 w-16 text-white/90 drop-shadow-lg" />
+            )}
           </div>
           <div className="absolute bottom-0 left-0 p-3 w-full">
             <h3 className="font-headline text-base font-bold text-white drop-shadow-md leading-tight truncate">
@@ -66,6 +88,6 @@ export default function AnimeCard({ anime }: AnimeCardProps) {
             )}
         </CardFooter>
       </Card>
-    </Link>
+    </div>
   );
 }
