@@ -17,9 +17,9 @@ function AnimeCard({ anime }: AnimeCardProps) {
     const scoreValue = typeof anime.score === 'string' ? anime.score : anime.score?.value;
     
     const handleClick = async (e: React.MouseEvent<HTMLDivElement>) => {
-      e.preventDefault();
+      e.stopPropagation(); // Mencegah event mengganggu carousel drag
 
-      // For recommended episodes, the correct episodeId is in the href.
+      // Untuk recommended episodes, episodeId yang benar ada di href.
       if (anime.episodeId && anime.href) {
         const id = anime.href.split('/').pop();
         if(id) {
@@ -28,19 +28,19 @@ function AnimeCard({ anime }: AnimeCardProps) {
         return;
       }
 
-      // For regular anime, find the latest episode and navigate to it.
+      // Untuk anime biasa, cari episode terbaru dan navigasi ke sana.
       if (anime.animeId) {
           try {
               const animeDetails = await getAnimeDetails(anime.animeId);
               if (animeDetails?.data?.episodeList?.[0]?.episodeId) {
                   router.push(`/episode/${animeDetails.data.episodeList[0].episodeId}`);
               } else {
-                  // Fallback to anime detail page if no episodes are found
+                  // Fallback ke halaman detail anime jika tidak ada episode
                   router.push(`/anime/${anime.animeId}`);
               }
           } catch (error) {
               console.error("Failed to get anime details for navigation:", error);
-              // Fallback in case of API error
+              // Fallback jika terjadi error API
               router.push(`/anime/${anime.animeId}`);
           }
       }
