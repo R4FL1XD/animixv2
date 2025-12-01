@@ -63,7 +63,7 @@ export default function EpisodeDetailPage() {
       }
       
       // Find the initial active server to highlight it
-      const initialServer = details.data.server.qualities.flatMap(q => q.serverList).find(s => s);
+      const initialServer = details.data.server.qualities.flatMap(q => q.serverList).find(s => s.title.toLowerCase().includes('blogspot'));
       if(initialServer) {
         setActiveServerId(initialServer.serverId);
       }
@@ -80,18 +80,21 @@ export default function EpisodeDetailPage() {
     fetchDetails();
   }, [id]);
 
-  const handleServerClick = async (serverId: string) => {
+  const handleServerClick = async (serverId: string, serverTitle: string) => {
     setLoadingStream(true);
     setActiveServerId(serverId);
     
     try {
-        // Always fetch from getServerUrl, for any server type
-        const serverData = await getServerUrl(serverId);
-        if (serverData && serverData.data.url) {
-          setStreamingUrl(serverData.data.url);
+        // If it's a blogspot server, use the default URL directly.
+        if (serverTitle.toLowerCase().includes('blogspot') && episodeDetails?.defaultStreamingUrl) {
+            setStreamingUrl(episodeDetails.defaultStreamingUrl);
         } else {
-          console.error('Failed to get server URL, serverData is null or missing url');
-          // Maybe set a default/error URL or show a toast
+            const serverData = await getServerUrl(serverId);
+            if (serverData && serverData.data.url) {
+              setStreamingUrl(serverData.data.url);
+            } else {
+              console.error('Failed to get server URL, serverData is null or missing url');
+            }
         }
     } catch(e) {
         console.error('Error fetching server URL:', e);
@@ -175,7 +178,7 @@ export default function EpisodeDetailPage() {
                                                 <Button 
                                                     key={server.serverId} 
                                                     variant={activeServerId === server.serverId ? 'default' : 'outline'}
-                                                    onClick={() => handleServerClick(server.serverId)}
+                                                    onClick={() => handleServerClick(server.serverId, server.title)}
                                                     disabled={loadingStream}
                                                 >
                                                      {loadingStream && activeServerId === server.serverId && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
