@@ -1,3 +1,4 @@
+
 'use client';
 
 import { getEpisodeDetails, getServerUrl, getAnimeDetails } from '@/lib/api';
@@ -62,9 +63,12 @@ export default function EpisodeDetailPage() {
           setStreamingUrl(details.data.defaultStreamingUrl);
       }
       
-      // Find the initial active server to highlight it
-      const initialServer = details.data.server.qualities.flatMap(q => q.serverList).find(s => s.title.toLowerCase().includes('blogspot'));
-      if(initialServer) {
+      // Find the initial active server (likely blogspot) to highlight it
+      const initialServer = details.data.server.qualities
+        .flatMap(q => q.serverList)
+        .find(s => s.title.toLowerCase().includes('blogspot'));
+
+      if (initialServer) {
         setActiveServerId(initialServer.serverId);
       }
 
@@ -89,15 +93,18 @@ export default function EpisodeDetailPage() {
         if (serverTitle.toLowerCase().includes('blogspot') && episodeDetails?.defaultStreamingUrl) {
             setStreamingUrl(episodeDetails.defaultStreamingUrl);
         } else {
+            // For other servers, fetch the URL
             const serverData = await getServerUrl(serverId);
             if (serverData && serverData.data.url) {
               setStreamingUrl(serverData.data.url);
             } else {
               console.error('Failed to get server URL, serverData is null or missing url');
+              setStreamingUrl(''); // Clear url on failure
             }
         }
     } catch(e) {
         console.error('Error fetching server URL:', e);
+        setStreamingUrl(''); // Clear url on error
     } finally {
         setLoadingStream(false);
     }
@@ -124,17 +131,21 @@ export default function EpisodeDetailPage() {
       <p className="text-muted-foreground mb-6">Released: {episode.releasedOn}</p>
 
       <div className="aspect-video bg-black rounded-lg overflow-hidden mb-6 relative">
-        {loadingStream && !streamingUrl ? (
+        {loadingStream ? (
            <div className="flex justify-center items-center h-full w-full bg-black">
                 <Loader2 className="h-12 w-12 animate-spin text-white" />
            </div>
-        ) : (
+        ) : streamingUrl ? (
             <iframe
             key={streamingUrl} // Re-render iframe when URL changes
             src={streamingUrl}
             allowFullScreen
             className="w-full h-full border-0"
             ></iframe>
+        ) : (
+          <div className="flex justify-center items-center h-full w-full bg-black text-white">
+            <p>Select a server to start streaming.</p>
+          </div>
         )}
       </div>
 
@@ -236,3 +247,5 @@ export default function EpisodeDetailPage() {
     </div>
   );
 }
+
+    
