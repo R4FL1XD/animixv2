@@ -25,7 +25,7 @@ export default function Header() {
   const handleSearch = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/?search=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
       setIsSheetOpen(false);
     }

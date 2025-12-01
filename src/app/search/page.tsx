@@ -1,16 +1,16 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { searchAnime } from '@/lib/api';
 import type { Anime } from '@/lib/types';
 import AnimeCard from '@/components/anime-card';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export default function SearchPage() {
+function SearchPageComponent() {
   const searchParams = useSearchParams();
-  const q = searchParams.get('q');
+  const q = searchParams.get('search');
 
   const [results, setResults] = useState<Anime[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,4 +85,13 @@ export default function SearchPage() {
       )}
     </div>
   );
+}
+
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div className="container flex justify-center items-center h-64"><Loader2 className="h-16 w-16 animate-spin" /></div>}>
+      <SearchPageComponent />
+    </Suspense>
+  )
 }

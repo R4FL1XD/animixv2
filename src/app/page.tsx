@@ -4,10 +4,10 @@ import TopAnimeList from '@/components/top-anime-list';
 import HeroSection from '@/components/hero-section';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
+import SearchPage from './search/page';
+import { Suspense } from 'react';
 
-export default async function Home() {
-  const homeData = await getHomeData();
-
+function HomePageContent({ homeData }: { homeData: Awaited<ReturnType<typeof getHomeData>> }) {
   if (!homeData || !homeData.data) {
     return (
       <div className="container py-20">
@@ -42,4 +42,20 @@ export default async function Home() {
       </div>
     </div>
   );
+}
+
+
+export default async function Home({ searchParams }: { searchParams?: { [key: string]: string | string[] | undefined } }) {
+  const searchQuery = searchParams?.search as string | undefined;
+
+  if (searchQuery) {
+    return (
+      <Suspense fallback={<div>Loading search...</div>}>
+        <SearchPage />
+      </Suspense>
+    );
+  }
+
+  const homeData = await getHomeData();
+  return <HomePageContent homeData={homeData} />;
 }
