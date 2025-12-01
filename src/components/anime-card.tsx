@@ -23,15 +23,31 @@ export default function AnimeCard({ anime }: AnimeCardProps) {
     e.preventDefault();
     setIsLoading(true);
 
+    // This handles recommended episodes which have episodeId in animeId field.
+    if (anime.animeId.includes('-episode-')) {
+        router.push(`/episode/${anime.animeId}`);
+        // We don't want to set loading to false here, because the page will navigate away.
+        // If navigation fails, the user is stuck with a loader. A better UX would be to handle this state globally.
+        return; 
+    }
+
+    // This handles regular anime cards, trying to find the latest episode.
     if (anime.episodes) {
-      const animeDetails = await getAnimeDetails(anime.animeId);
-      if (animeDetails?.data?.episodeList?.[0]?.episodeId) {
-        const latestEpisodeId = animeDetails.data.episodeList[0].episodeId;
-        router.push(`/episode/${latestEpisodeId}`);
-      } else {
+      try {
+        const animeDetails = await getAnimeDetails(anime.animeId);
+        if (animeDetails?.data?.episodeList?.[0]?.episodeId) {
+          const latestEpisodeId = animeDetails.data.episodeList[0].episodeId;
+          router.push(`/episode/${latestEpisodeId}`);
+        } else {
+          // Fallback to anime detail page if no episodes found
+          router.push(`/anime/${anime.animeId}`);
+        }
+      } catch (error) {
+        console.error("Failed to get anime details, navigating to anime page:", error);
         router.push(`/anime/${anime.animeId}`);
       }
     } else {
+      // For movies or anime with no episode info
       router.push(`/anime/${anime.animeId}`);
     }
   };
