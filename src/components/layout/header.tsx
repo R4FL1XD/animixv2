@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Clapperboard, Menu, Search } from 'lucide-react';
+import { Menu, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sheet"
 import { Separator } from '../ui/separator';
 import { ThemeToggle } from '../theme-toggle';
+import Image from 'next/image';
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -39,10 +40,10 @@ export default function Header() {
       <div className="container flex h-16 max-w-screen-2xl items-center">
         <div className="mr-4 hidden md:flex">
             <Link href="/" className="mr-6 flex items-center space-x-2">
-            <Clapperboard className="h-6 w-6 text-primary" />
-            <span className="font-bold sm:inline-block text-lg">
-                Animix
-            </span>
+              <Image src="https://i.ibb.co/0VsSsQ45/IMG-20251201-090159.jpg" alt="Animix Logo" width={24} height={24} className="h-6 w-6 rounded-sm" />
+              <span className="font-bold sm:inline-block text-lg">
+                  Animix
+              </span>
             </Link>
             <nav className="flex items-center gap-6 text-sm font-medium">
             <Link
@@ -61,7 +62,7 @@ export default function Header() {
                 href="/recent"
                 className="transition-colors hover:text-foreground/80 text-foreground"
             >
-                Recent
+                New Episodes
             </Link>
             <Link
                 href="/popular"
@@ -85,7 +86,7 @@ export default function Header() {
                 href="/all"
                 className="transition-colors hover:text-foreground/80 text-foreground"
             >
-                A-Z List
+                All Anime
             </Link>
             </nav>
         </div>
@@ -105,7 +106,7 @@ export default function Header() {
           <SheetContent side="left" className="pr-0">
             <SheetTitle className="sr-only">Menu</SheetTitle>
              <Link href="/" className="mr-6 flex items-center space-x-2 px-6" onClick={handleLinkClick}>
-                <Clapperboard className="h-6 w-6 text-primary" />
+                <Image src="https://i.ibb.co/0VsSsQ45/IMG-20251201-090159.jpg" alt="Animix Logo" width={24} height={24} className="h-6 w-6 rounded-sm" />
                 <span className="font-bold text-lg">
                     Animix
                 </span>
@@ -131,7 +132,7 @@ export default function Header() {
                     onClick={handleLinkClick}
                     className="transition-colors hover:text-primary"
                 >
-                    Recent
+                    New Episodes
                 </Link>
                 <Link
                     href="/popular"
@@ -159,7 +160,7 @@ export default function Header() {
                     onClick={handleLinkClick}
                     className="transition-colors hover:text-primary"
                 >
-                    A-Z List
+                    All Anime
                 </Link>
             </div>
           </SheetContent>
@@ -167,7 +168,7 @@ export default function Header() {
         
         <div className="md:hidden flex-1">
             <Link href="/" className="flex items-center space-x-2 justify-center">
-                 <Clapperboard className="h-6 w-6 text-primary" />
+                 <Image src="https://i.ibb.co/0VsSsQ45/IMG-20251201-090159.jpg" alt="Animix Logo" width={24} height={24} className="h-6 w-6 rounded-sm" />
                  <span className="font-bold sm:inline-block text-lg">
                     Animix
                 </span>
@@ -179,8 +180,8 @@ export default function Header() {
             <form onSubmit={handleSearch} className="relative w-full max-w-xs">
                 <Input
                     type="search"
-                    placeholder="Search..."
-                    className="h-9 w-full rounded-full border-2 border-border bg-background/50 pl-4 pr-10"
+                    placeholder="Search anime..."
+                    className="h-9 w-full rounded-full border bg-transparent pl-4 pr-10 focus:border-primary transition-colors"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -188,7 +189,7 @@ export default function Header() {
                     type="submit"
                     size="icon"
                     variant="ghost"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full text-muted-foreground"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full text-muted-foreground hover:text-primary"
                 >
                     <Search className="h-4 w-4" />
                     <span className="sr-only">Search</span>
