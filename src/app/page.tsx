@@ -23,11 +23,11 @@ function HomePageContent({ homeData }: { homeData: Awaited<ReturnType<typeof get
   }
 
   const { recent, movie, top10 } = homeData.data;
-  const heroAnime = recent.animeList[0];
+  const heroAnimes = recent.animeList.slice(0, 5);
 
   return (
     <div className="flex flex-col">
-      {heroAnime && <HeroSection anime={heroAnime} />}
+      {heroAnimes.length > 0 && <HeroSection animes={heroAnimes} />}
       <div className="container">
         <AnimeCarousel title="Recent Releases" animes={recent.animeList} viewAllLink="/recent"/>
         

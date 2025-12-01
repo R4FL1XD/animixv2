@@ -1,21 +1,71 @@
-import type { HomeData, AnimeDetailData, EpisodeDetailData, ServerUrlData, SearchData, PaginatedAnimeData, ScheduleData, AllAnimeData } from './types';
+import type { HomeData, AnimeDetailData, EpisodeDetailData, ServerUrlData, SearchData, PaginatedAnimeData, ScheduleData, AllAnimeData, Anime } from './types';
 
 const API_BASE_URL = 'https://www.sankavollerei.com';
 
+async function fetchWithRetry(url: string, options: RequestInit, retries = 3, backoff = 300): Promise<Response> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await fetch(url, options);
+      if (res.ok) {
+        return res;
+      }
+      if (res.status >= 500 && i < retries - 1) {
+        console.warn(`API call failed with status ${res.status}. Retrying in ${backoff}ms...`);
+        await new Promise(resolve => setTimeout(resolve, backoff));
+        backoff *= 2; // Exponential backoff
+        continue;
+      }
+      return res; // Return non-5xx errors immediately
+    } catch (error) {
+      if (i < retries - 1) {
+        console.warn(`API call failed with error: ${error}. Retrying in ${backoff}ms...`);
+        await new Promise(resolve => setTimeout(resolve, backoff));
+        backoff *= 2;
+        continue;
+      }
+      throw error;
+    }
+  }
+  // This part should be unreachable if retries > 0
+  throw new Error('API request failed after multiple retries.');
+}
+
+
+function addGenreListToAnime(anime: Anime, details: AnimeDetailData): Anime {
+    if (details.data && details.data.genreList) {
+        return {
+            ...anime,
+            genreList: details.data.genreList,
+        };
+    }
+    return anime;
+}
+
 export async function getHomeData(): Promise<HomeData | null> {
   try {
-    const res = await fetch(`${API_BASE_URL}/anime/samehadaku/home`, {
-      // Revalidate every hour to get fresh data
+    const res = await fetchWithRetry(`${API_BASE_URL}/anime/samehadaku/home`, {
       next: { revalidate: 3600 },
     });
     
     if (!res.ok) {
       console.error('Failed to fetch home data:', res.status, res.statusText);
-      // Don't throw, return null to handle gracefully in the UI
       return null;
     }
 
-    const data: HomeData = await res.json();
+    let data: HomeData = await res.json();
+    
+    // Enrich recent anime with genre data
+    if (data.data && data.data.recent && data.data.recent.animeList) {
+        const enrichedRecentList = await Promise.all(
+            data.data.recent.animeList.map(async (anime) => {
+                const details = await getAnimeDetails(anime.animeId);
+                return details ? addGenreListToAnime(anime, details) : anime;
+            })
+        );
+        data.data.recent.animeList = enrichedRecentList;
+    }
+
+
     return data;
   } catch (error) {
     console.error('Error fetching home data:', error);
@@ -30,7 +80,7 @@ export async function getAnimeDetails(animeId: string): Promise<AnimeDetailData 
     return null;
   }
   try {
-    const res = await fetch(`${API_BASE_URL}/anime/samehadaku/anime/${animeId}`, {
+    const res = await fetchWithRetry(`${API_BASE_URL}/anime/samehadaku/anime/${animeId}`, {
       next: { revalidate: 3600 }, // Revalidate every hour
     });
 
@@ -40,7 +90,6 @@ export async function getAnimeDetails(animeId: string): Promise<AnimeDetailData 
     }
 
     const data: AnimeDetailData = await res.json();
-    // The API returns an empty title for some reason, so we'll patch it.
     if (data.data && !data.data.title) {
         data.data.title = animeId.replace(/-/g, ' ').replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase());
     }
@@ -54,7 +103,7 @@ export async function getAnimeDetails(animeId: string): Promise<AnimeDetailData 
 export async function getEpisodeDetails(episodeId: string): Promise<EpisodeDetailData | null> {
     if (!episodeId) return null;
     try {
-        const res = await fetch(`${API_BASE_URL}/anime/samehadaku/episode/${episodeId}`, {
+        const res = await fetchWithRetry(`${API_BASE_URL}/anime/samehadaku/episode/${episodeId}`, {
             next: { revalidate: 3600 },
         });
 
@@ -75,7 +124,7 @@ export async function getServerUrl(serverId: string): Promise<ServerUrlData | nu
     if (!serverId) return null;
     
     try {
-        const res = await fetch(`${API_BASE_URL}/anime/samehadaku/server/${serverId}`);
+        const res = await fetchWithRetry(`${API_BASE_URL}/anime/samehadaku/server/${serverId}`, {});
 
         if (!res.ok) {
             console.error(`Failed to fetch server URL for ${serverId}:`, res.status, res.statusText);
@@ -93,8 +142,8 @@ export async function getServerUrl(serverId: string): Promise<ServerUrlData | nu
 export async function searchAnime(query: string, page: number = 1): Promise<SearchData | null> {
   if (!query) return null;
   try {
-    const res = await fetch(`${API_BASE_URL}/anime/samehadaku/search?q=${encodeURIComponent(query)}&page=${page}`, {
-      next: { revalidate: 3600 }, // Revalidate every hour
+    const res = await fetchWithRetry(`${API_BASE_URL}/anime/samehadaku/search?q=${encodeURIComponent(query)}&page=${page}`, {
+      next: { revalidate: 3600 },
     });
 
     if (!res.ok) {
@@ -112,8 +161,8 @@ export async function searchAnime(query: string, page: number = 1): Promise<Sear
 
 export async function getRecentAnime(page: number = 1): Promise<PaginatedAnimeData | null> {
   try {
-    const res = await fetch(`${API_BASE_URL}/anime/samehadaku/recent?page=${page}`, {
-      next: { revalidate: 1800 }, // Revalidate every 30 minutes
+    const res = await fetchWithRetry(`${API_BASE_URL}/anime/samehadaku/recent?page=${page}`, {
+      next: { revalidate: 1800 },
     });
 
     if (!res.ok) {
@@ -132,8 +181,8 @@ export async function getRecentAnime(page: number = 1): Promise<PaginatedAnimeDa
 export async function getAnimeByGenre(genreId: string, page: number = 1): Promise<PaginatedAnimeData | null> {
   if (!genreId) return null;
   try {
-    const res = await fetch(`${API_BASE_URL}/anime/samehadaku/genres/${genreId}?page=${page}`, {
-      next: { revalidate: 3600 }, // Revalidate every hour
+    const res = await fetchWithRetry(`${API_BASE_URL}/anime/samehadaku/genres/${genreId}?page=${page}`, {
+      next: { revalidate: 3600 },
     });
 
     if (!res.ok) {
@@ -151,8 +200,8 @@ export async function getAnimeByGenre(genreId: string, page: number = 1): Promis
 
 export async function getScheduleData(): Promise<ScheduleData | null> {
     try {
-      const res = await fetch(`${API_BASE_URL}/anime/samehadaku/schedule`, {
-        next: { revalidate: 3600 * 6 }, // Revalidate every 6 hours
+      const res = await fetchWithRetry(`${API_BASE_URL}/anime/samehadaku/schedule`, {
+        next: { revalidate: 3600 * 6 },
       });
   
       if (!res.ok) {
@@ -170,8 +219,8 @@ export async function getScheduleData(): Promise<ScheduleData | null> {
 
 export async function getMovies(page: number = 1): Promise<PaginatedAnimeData | null> {
   try {
-    const res = await fetch(`${API_BASE_URL}/anime/samehadaku/movies?page=${page}`, {
-      next: { revalidate: 3600 }, // Revalidate every hour
+    const res = await fetchWithRetry(`${API_BASE_URL}/anime/samehadaku/movies?page=${page}`, {
+      next: { revalidate: 3600 },
     });
 
     if (!res.ok) {
@@ -189,8 +238,8 @@ export async function getMovies(page: number = 1): Promise<PaginatedAnimeData | 
 
 export async function getPopularAnime(page: number = 1): Promise<PaginatedAnimeData | null> {
   try {
-    const res = await fetch(`${API_BASE_URL}/anime/samehadaku/popular?page=${page}`, {
-      next: { revalidate: 3600 }, // Revalidate every hour
+    const res = await fetchWithRetry(`${API_BASE_URL}/anime/samehadaku/popular?page=${page}`, {
+      next: { revalidate: 3600 },
     });
 
     if (!res.ok) {
@@ -208,8 +257,8 @@ export async function getPopularAnime(page: number = 1): Promise<PaginatedAnimeD
 
 export async function getAllAnimeList(): Promise<AllAnimeData | null> {
     try {
-      const res = await fetch(`${API_BASE_URL}/anime/samehadaku/list`, {
-        next: { revalidate: 3600 * 24 }, // Revalidate once a day
+      const res = await fetchWithRetry(`${API_BASE_URL}/anime/samehadaku/list`, {
+        next: { revalidate: 3600 * 24 },
       });
   
       if (!res.ok) {
@@ -227,8 +276,8 @@ export async function getAllAnimeList(): Promise<AllAnimeData | null> {
   
 export async function getCompletedAnime(page: number = 1): Promise<PaginatedAnimeData | null> {
     try {
-      const res = await fetch(`${API_BASE_URL}/anime/samehadaku/completed?page=${page}`, {
-        next: { revalidate: 3600 }, // Revalidate every hour
+      const res = await fetchWithRetry(`${API_BASE_URL}/anime/samehadaku/completed?page=${page}`, {
+        next: { revalidate: 3600 },
       });
   
       if (!res.ok) {
