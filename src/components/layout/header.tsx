@@ -40,7 +40,7 @@ export default function Header() {
       <div className="container flex h-16 max-w-screen-2xl items-center">
         <div className="mr-4 hidden md:flex">
             <Link href="/" className="mr-6 flex items-center space-x-2">
-              <Image src="https://i.ibb.co/0VsSsQ45/IMG-20251201-090159.jpg" alt="Animix Logo" width={24} height={24} className="h-6 w-6 rounded-sm" />
+              <Image src="https://i.ibb.co/0VsSsQ45/IMG-20251201-090159.jpg" alt="Animix Logo" width={32} height={32} className="h-8 w-8 rounded-sm" />
               <span className="font-bold sm:inline-block text-lg">
                   Animix
               </span>
@@ -106,7 +106,7 @@ export default function Header() {
           <SheetContent side="left" className="pr-0">
             <SheetTitle className="sr-only">Menu</SheetTitle>
              <Link href="/" className="mr-6 flex items-center space-x-2 px-6" onClick={handleLinkClick}>
-                <Image src="https://i.ibb.co/0VsSsQ45/IMG-20251201-090159.jpg" alt="Animix Logo" width={24} height={24} className="h-6 w-6 rounded-sm" />
+                <Image src="https://i.ibb.co/0VsSsQ45/IMG-20251201-090159.jpg" alt="Animix Logo" width={32} height={32} className="h-8 w-8 rounded-sm" />
                 <span className="font-bold text-lg">
                     Animix
                 </span>
@@ -168,7 +168,7 @@ export default function Header() {
         
         <div className="md:hidden flex-1">
             <Link href="/" className="flex items-center space-x-2 justify-center">
-                 <Image src="https://i.ibb.co/0VsSsQ45/IMG-20251201-090159.jpg" alt="Animix Logo" width={24} height={24} className="h-6 w-6 rounded-sm" />
+                 <Image src="https://i.ibb.co/0VsSsQ45/IMG-20251201-090159.jpg" alt="Animix Logo" width={32} height={32} className="h-8 w-8 rounded-sm" />
                  <span className="font-bold sm:inline-block text-lg">
                     Animix
                 </span>
