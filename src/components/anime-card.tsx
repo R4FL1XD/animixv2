@@ -5,75 +5,26 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Anime } from '@/lib/types';
 import { PlayCircle, Calendar, Star } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { getAnimeDetails } from '@/lib/api';
 import Link from 'next/link';
-import React from 'react';
 
 interface AnimeCardProps {
   anime: Anime;
 }
 
-// Sub-component to handle the click logic and navigation
-function AnimeCardLink({ anime, children }: { anime: Anime, children: React.ReactNode }) {
-    const router = useRouter();
-
-    const handleClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
-        // Prevent default link behavior to handle navigation manually
-        e.preventDefault();
-
-        // This handles recommended episodes, which have a different data structure
-        if (anime.episodeId) {
-            const correctEpisodeId = anime.href.split('/').pop();
-            if (correctEpisodeId) {
-                router.push(`/episode/${correctEpisodeId}`);
-            }
-            return;
-        }
-
-        // This handles regular anime cards
-        if (anime.animeId) {
-            try {
-                const animeDetails = await getAnimeDetails(anime.animeId);
-                // Navigate to the latest episode if it exists
-                if (animeDetails?.data?.episodeList?.[0]?.episodeId) {
-                    const latestEpisodeId = animeDetails.data.episodeList[0].episodeId;
-                    router.push(`/episode/${latestEpisodeId}`);
-                } else {
-                    // Fallback to anime detail page if no episodes are found
-                    router.push(`/anime/${anime.animeId}`);
-                }
-            } catch (error) {
-                console.error("Failed to get details for navigation", error);
-                // Fallback navigation if API fails
-                router.push(`/anime/${anime.animeId}`);
-            }
-        }
-    };
+function AnimeCard({ anime }: AnimeCardProps) {
+    const scoreValue = typeof anime.score === 'string' ? anime.score : anime.score?.value;
     
-    // The href is a fallback for right-click/middle-click functionality
-    const fallbackHref = anime.episodeId 
+    // Determine the correct href based on whether it's a recommended episode or a regular anime
+    // Recommended episodes have `episodeId` and the correct ID is in `href`.
+    // Regular anime should link to their detail page. The logic to go to the latest episode
+    // should be on the anime detail page itself, or triggered from there.
+    // For now, linking to the detail page is the most robust solution without client-side fetches here.
+    const href = anime.episodeId 
         ? `/episode/${anime.href.split('/').pop()}` 
         : `/anime/${anime.animeId}`;
 
     return (
-        <Link 
-            href={fallbackHref}
-            onClick={handleClick}
-            className="group block outline-none cursor-pointer w-full h-full"
-            aria-label={`Play ${anime.title}`}
-        >
-           {children}
-        </Link>
-    );
-}
-
-
-function AnimeCard({ anime }: AnimeCardProps) {
-    const scoreValue = typeof anime.score === 'string' ? anime.score : anime.score?.value;
-    
-    return (
-        <AnimeCardLink anime={anime}>
+        <Link href={href} className="group block outline-none cursor-pointer w-full h-full" aria-label={`Play ${anime.title}`}>
             <Card className="h-full w-full overflow-hidden transition-all duration-300 ease-in-out group-hover:shadow-primary/20 group-hover:-translate-y-1 group-focus-visible:shadow-primary/20 group-focus-visible:-translate-y-1 group-focus-visible:ring-2 group-focus-visible:ring-primary ring-offset-2 ring-offset-background">
                 <CardContent className="p-0 relative">
                     <Image
@@ -140,7 +91,7 @@ function AnimeCard({ anime }: AnimeCardProps) {
                     )}
                 </CardFooter>
             </Card>
-        </AnimeCardLink>
+        </Link>
     );
 }
 
