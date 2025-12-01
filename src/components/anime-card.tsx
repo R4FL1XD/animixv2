@@ -4,8 +4,10 @@ import Image from 'next/image';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Anime } from '@/lib/types';
-import { PlayCircle, Calendar, Star } from 'lucide-react';
+import { PlayCircle, Calendar, Star, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { getAnimeDetails } from '@/lib/api';
+import { useState } from 'react';
 
 interface AnimeCardProps {
   anime: Anime;
@@ -13,23 +15,36 @@ interface AnimeCardProps {
 
 export default function AnimeCard({ anime }: AnimeCardProps) {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   
   const scoreValue = typeof anime.score === 'string' ? anime.score : anime.score?.value;
 
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleClick = async (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
+    setIsLoading(true);
 
     const targetId = anime.episodeId || anime.animeId;
-    if (!targetId) return;
+    if (!targetId) {
+        setIsLoading(false);
+        return;
+    };
 
     // This handles recommended episodes which have episodeId
     if (targetId.includes('-episode-')) {
         router.push(`/episode/${targetId}`);
+        // No need to setIsLoading(false) because the page will navigate away
         return; 
     }
     
-    // For anything else, navigate to the anime detail page.
-    router.push(`/anime/${targetId}`);
+    // For anything else, get details to find the latest episode and navigate.
+    const animeDetails = await getAnimeDetails(targetId);
+    if (animeDetails?.data?.episodeList?.[0]?.episodeId) {
+      const latestEpisodeId = animeDetails.data.episodeList[0].episodeId;
+      router.push(`/episode/${latestEpisodeId}`);
+    } else {
+      // Fallback to anime detail page if no episodes are found
+      router.push(`/anime/${targetId}`);
+    }
   };
 
 
@@ -47,7 +62,11 @@ export default function AnimeCard({ anime }: AnimeCardProps) {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300 bg-black/40">
-            <PlayCircle className="h-16 w-16 text-white/90 drop-shadow-lg" />
+            {isLoading ? (
+                <Loader2 className="h-16 w-16 text-white/90 animate-spin" />
+            ) : (
+                <PlayCircle className="h-16 w-16 text-white/90 drop-shadow-lg" />
+            )}
           </div>
           <div className="absolute bottom-0 left-0 p-3 w-full">
             <h3 className="font-headline text-base font-bold text-white drop-shadow-md leading-tight truncate">
