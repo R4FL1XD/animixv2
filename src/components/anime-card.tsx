@@ -5,26 +5,49 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Anime } from '@/lib/types';
 import { PlayCircle, Calendar, Star } from 'lucide-react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { getAnimeDetails } from '@/lib/api';
 
 interface AnimeCardProps {
   anime: Anime;
 }
 
 function AnimeCard({ anime }: AnimeCardProps) {
+    const router = useRouter();
     const scoreValue = typeof anime.score === 'string' ? anime.score : anime.score?.value;
     
-    // Determine the correct href based on whether it's a recommended episode or a regular anime
-    // Recommended episodes have `episodeId` and the correct ID is in `href`.
-    // Regular anime should link to their detail page. The logic to go to the latest episode
-    // should be on the anime detail page itself, or triggered from there.
-    // For now, linking to the detail page is the most robust solution without client-side fetches here.
-    const href = anime.episodeId 
-        ? `/episode/${anime.href.split('/').pop()}` 
-        : `/anime/${anime.animeId}`;
+    const handleClick = async (e: React.MouseEvent<HTMLDivElement>) => {
+      e.preventDefault();
+
+      // For recommended episodes, the correct episodeId is in the href.
+      if (anime.episodeId && anime.href) {
+        const id = anime.href.split('/').pop();
+        if(id) {
+          router.push(`/episode/${id}`);
+        }
+        return;
+      }
+
+      // For regular anime, find the latest episode and navigate to it.
+      if (anime.animeId) {
+          try {
+              const animeDetails = await getAnimeDetails(anime.animeId);
+              if (animeDetails?.data?.episodeList?.[0]?.episodeId) {
+                  router.push(`/episode/${animeDetails.data.episodeList[0].episodeId}`);
+              } else {
+                  // Fallback to anime detail page if no episodes are found
+                  router.push(`/anime/${anime.animeId}`);
+              }
+          } catch (error) {
+              console.error("Failed to get anime details for navigation:", error);
+              // Fallback in case of API error
+              router.push(`/anime/${anime.animeId}`);
+          }
+      }
+    };
 
     return (
-        <Link href={href} className="group block outline-none cursor-pointer w-full h-full" aria-label={`Play ${anime.title}`}>
+        <div onClick={handleClick} className="group block outline-none cursor-pointer w-full h-full" aria-label={`Play ${anime.title}`}>
             <Card className="h-full w-full overflow-hidden transition-all duration-300 ease-in-out group-hover:shadow-primary/20 group-hover:-translate-y-1 group-focus-visible:shadow-primary/20 group-focus-visible:-translate-y-1 group-focus-visible:ring-2 group-focus-visible:ring-primary ring-offset-2 ring-offset-background">
                 <CardContent className="p-0 relative">
                     <Image
@@ -37,12 +60,10 @@ function AnimeCard({ anime }: AnimeCardProps) {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                     
-                    {/* Centered Play Button */}
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300 bg-black/40">
                         <PlayCircle className="h-16 w-16 text-white/90 drop-shadow-lg" />
                     </div>
 
-                    {/* Genres on Hover */}
                     <div className="absolute inset-0 top-auto h-2/3 bg-gradient-to-t from-black/90 to-transparent p-3 flex flex-col justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         {anime.genreList && anime.genreList.length > 0 && (
                              <div className="flex flex-wrap gap-1.5 mb-2">
@@ -58,7 +79,6 @@ function AnimeCard({ anime }: AnimeCardProps) {
                         </h3>
                     </div>
 
-                    {/* Default Title View */}
                     <div className="absolute bottom-0 left-0 p-3 w-full group-hover:opacity-0 transition-opacity duration-300">
                         <h3 className="font-headline text-base font-bold text-white drop-shadow-md leading-tight truncate">
                             {anime.title}
@@ -91,7 +111,7 @@ function AnimeCard({ anime }: AnimeCardProps) {
                     )}
                 </CardFooter>
             </Card>
-        </Link>
+        </div>
     );
 }
 
