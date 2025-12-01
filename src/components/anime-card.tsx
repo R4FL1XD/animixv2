@@ -20,16 +20,20 @@ export default function AnimeCard({ anime }: AnimeCardProps) {
   const handleClick = async (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
 
-    const targetId = anime.episodeId || anime.animeId;
+    // This handles recommended episodes which have episodeId
+    if (anime.episodeId) {
+        // The API returns incorrect episodeId for recommended items, so we extract it from href.
+        const correctEpisodeId = anime.href.split('/').pop();
+        if (correctEpisodeId) {
+            router.push(`/episode/${correctEpisodeId}`);
+        }
+        return; 
+    }
+    
+    const targetId = anime.animeId;
     if (!targetId) {
         return;
     };
-
-    // This handles recommended episodes which have episodeId
-    if (anime.episodeId) {
-        router.push(`/episode/${anime.episodeId}`);
-        return; 
-    }
     
     // For anything else, get details to find the latest episode and navigate.
     const animeDetails = await getAnimeDetails(targetId);
