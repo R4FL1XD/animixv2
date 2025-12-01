@@ -1,53 +1,26 @@
 "use client";
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Anime } from '@/lib/types';
 import { PlayCircle, Calendar, Star } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { getAnimeDetails } from '@/lib/api';
 
 interface AnimeCardProps {
   anime: Anime;
 }
 
 function AnimeCard({ anime }: AnimeCardProps) {
-    const router = useRouter();
     const scoreValue = typeof anime.score === 'string' ? anime.score : anime.score?.value;
     
-    const handleClick = async (e: React.MouseEvent<HTMLDivElement>) => {
-      e.stopPropagation(); // Mencegah event mengganggu carousel drag
-
-      // Untuk recommended episodes, episodeId yang benar ada di href.
-      if (anime.episodeId && anime.href) {
-        const id = anime.href.split('/').pop();
-        if(id) {
-          router.push(`/episode/${id}`);
-        }
-        return;
-      }
-
-      // Untuk anime biasa, cari episode terbaru dan navigasi ke sana.
-      if (anime.animeId) {
-          try {
-              const animeDetails = await getAnimeDetails(anime.animeId);
-              if (animeDetails?.data?.episodeList?.[0]?.episodeId) {
-                  router.push(`/episode/${animeDetails.data.episodeList[0].episodeId}`);
-              } else {
-                  // Fallback ke halaman detail anime jika tidak ada episode
-                  router.push(`/anime/${anime.animeId}`);
-              }
-          } catch (error) {
-              console.error("Failed to get anime details for navigation:", error);
-              // Fallback jika terjadi error API
-              router.push(`/anime/${anime.animeId}`);
-          }
-      }
-    };
+    // Default to anime detail page, special logic for episode pages will be handled there or by specific carousels
+    const linkHref = anime.episodeId && anime.href?.includes('/episode/') 
+      ? `/episode/${anime.href.split('/').pop()}`
+      : `/anime/${anime.animeId}`;
 
     return (
-        <div onClick={handleClick} className="group block outline-none cursor-pointer w-full h-full" aria-label={`Play ${anime.title}`}>
+        <Link href={linkHref} className="group block outline-none cursor-pointer w-full h-full" aria-label={`View details for ${anime.title}`}>
             <Card className="h-full w-full overflow-hidden transition-all duration-300 ease-in-out group-hover:shadow-primary/20 group-hover:-translate-y-1 group-focus-visible:shadow-primary/20 group-focus-visible:-translate-y-1 group-focus-visible:ring-2 group-focus-visible:ring-primary ring-offset-2 ring-offset-background">
                 <CardContent className="p-0 relative">
                     <Image
@@ -111,7 +84,7 @@ function AnimeCard({ anime }: AnimeCardProps) {
                     )}
                 </CardFooter>
             </Card>
-        </div>
+        </Link>
     );
 }
 
