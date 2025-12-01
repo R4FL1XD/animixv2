@@ -4,10 +4,8 @@ import Image from 'next/image';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Anime } from '@/lib/types';
-import { PlayCircle, Calendar, Star, Loader2 } from 'lucide-react';
+import { PlayCircle, Calendar, Star } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { getAnimeDetails } from '@/lib/api';
 
 interface AnimeCardProps {
   anime: Anime;
@@ -15,41 +13,21 @@ interface AnimeCardProps {
 
 export default function AnimeCard({ anime }: AnimeCardProps) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
   
   const scoreValue = typeof anime.score === 'string' ? anime.score : anime.score?.value;
 
-  const handleClick = async (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
-    setIsLoading(true);
 
     // This handles recommended episodes which have episodeId in animeId field.
     if (anime.animeId.includes('-episode-')) {
         router.push(`/episode/${anime.animeId}`);
-        // We don't want to set loading to false here, because the page will navigate away.
-        // If navigation fails, the user is stuck with a loader. A better UX would be to handle this state globally.
         return; 
     }
-
-    // This handles regular anime cards, trying to find the latest episode.
-    if (anime.episodes) {
-      try {
-        const animeDetails = await getAnimeDetails(anime.animeId);
-        if (animeDetails?.data?.episodeList?.[0]?.episodeId) {
-          const latestEpisodeId = animeDetails.data.episodeList[0].episodeId;
-          router.push(`/episode/${latestEpisodeId}`);
-        } else {
-          // Fallback to anime detail page if no episodes found
-          router.push(`/anime/${anime.animeId}`);
-        }
-      } catch (error) {
-        console.error("Failed to get anime details, navigating to anime page:", error);
-        router.push(`/anime/${anime.animeId}`);
-      }
-    } else {
-      // For movies or anime with no episode info
-      router.push(`/anime/${anime.animeId}`);
-    }
+    
+    // For anything else, navigate to the anime detail page.
+    // The detail page can handle fetching its own data or finding the latest episode.
+    router.push(`/anime/${anime.animeId}`);
   };
 
 
@@ -67,11 +45,7 @@ export default function AnimeCard({ anime }: AnimeCardProps) {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300 bg-black/40">
-            {isLoading ? (
-              <Loader2 className="h-16 w-16 text-white/90 animate-spin" />
-            ) : (
-              <PlayCircle className="h-16 w-16 text-white/90 drop-shadow-lg" />
-            )}
+            <PlayCircle className="h-16 w-16 text-white/90 drop-shadow-lg" />
           </div>
           <div className="absolute bottom-0 left-0 p-3 w-full">
             <h3 className="font-headline text-base font-bold text-white drop-shadow-md leading-tight truncate">
