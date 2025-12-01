@@ -25,7 +25,10 @@ export async function getHomeData(): Promise<HomeData | null> {
 
 
 export async function getAnimeDetails(animeId: string): Promise<AnimeDetailData | null> {
-  if (!animeId) return null;
+  if (!animeId) {
+    console.error('getAnimeDetails called with undefined or null animeId');
+    return null;
+  }
   try {
     const res = await fetch(`${API_BASE_URL}/anime/samehadaku/anime/${animeId}`, {
       next: { revalidate: 3600 }, // Revalidate every hour
@@ -70,16 +73,7 @@ export async function getEpisodeDetails(episodeId: string): Promise<EpisodeDetai
 
 export async function getServerUrl(serverId: string): Promise<ServerUrlData | null> {
     if (!serverId) return null;
-    // Blogspot links don't use this endpoint, they are direct URLs.
-    if (serverId.toLowerCase().includes('blogspot')) {
-        return {
-            status: 'success',
-            creator: 'Sanka Vollerei',
-            message: 'Direct URL',
-            data: { url: serverId },
-            pagination: null
-        };
-    }
+    
     try {
         const res = await fetch(`${API_BASE_URL}/anime/samehadaku/server/${serverId}`);
 
