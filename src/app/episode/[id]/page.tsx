@@ -59,12 +59,7 @@ export default function EpisodeDetailPage() {
       
       const initialServer = details.data.server.qualities[0]?.serverList[0];
       if (initialServer) {
-        setActiveServerId(initialServer.serverId);
-        if (initialServer.title.toLowerCase().includes('blogspot')) {
-          setStreamingUrl(initialServer.serverId);
-        } else {
-          setStreamingUrl(details.data.defaultStreamingUrl);
-        }
+        handleServerClick(initialServer.serverId);
       } else {
         setStreamingUrl(details.data.defaultStreamingUrl);
       }
@@ -81,15 +76,9 @@ export default function EpisodeDetailPage() {
     fetchDetails();
   }, [id]);
 
-  const handleServerClick = async (serverId: string, serverTitle: string) => {
+  const handleServerClick = async (serverId: string) => {
     setLoadingStream(true);
     setActiveServerId(serverId);
-
-    if (serverTitle.toLowerCase().includes('blogspot')) {
-        setStreamingUrl(serverId);
-        setLoadingStream(false);
-        return;
-    }
     
     try {
         const serverData = await getServerUrl(serverId);
@@ -97,11 +86,13 @@ export default function EpisodeDetailPage() {
           setStreamingUrl(serverData.data.url);
         } else {
           console.error('Failed to get server URL, serverData is null or missing url');
+          // Maybe set a default/error URL or show a toast
         }
     } catch(e) {
         console.error('Error fetching server URL:', e);
+    } finally {
+        setLoadingStream(false);
     }
-    setLoadingStream(false);
   };
   
   if (loading || !episodeDetails) {
@@ -125,7 +116,7 @@ export default function EpisodeDetailPage() {
       <p className="text-muted-foreground mb-6">Released: {episode.releasedOn}</p>
 
       <div className="aspect-video bg-black rounded-lg overflow-hidden mb-6 relative">
-        {loadingStream ? (
+        {loadingStream && !streamingUrl ? (
            <div className="flex justify-center items-center h-full w-full bg-black">
                 <Loader2 className="h-12 w-12 animate-spin text-white" />
            </div>
@@ -179,8 +170,8 @@ export default function EpisodeDetailPage() {
                                                 <Button 
                                                     key={server.serverId} 
                                                     variant={activeServerId === server.serverId ? 'default' : 'outline'}
-                                                    onClick={() => handleServerClick(server.serverId, server.title)}
-                                                    disabled={loadingStream && activeServerId === server.serverId}
+                                                    onClick={() => handleServerClick(server.serverId)}
+                                                    disabled={loadingStream}
                                                 >
                                                      {loadingStream && activeServerId === server.serverId && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                                     {server.title}
