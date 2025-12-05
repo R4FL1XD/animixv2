@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { ScheduleAnime } from '@/lib/types';
 import { Clock, Star, Tag } from 'lucide-react';
+import { Skeleton } from './ui/skeleton';
 
 interface ScheduleAnimeCardProps {
   anime: ScheduleAnime;
@@ -18,14 +19,18 @@ export default function ScheduleAnimeCard({ anime }: ScheduleAnimeCardProps) {
     <Link href={linkHref} className="group block outline-none" tabIndex={0}>
       <Card className="flex h-full w-full overflow-hidden transition-all duration-300 ease-in-out hover:shadow-lg hover:bg-card/95 focus-visible:shadow-lg focus-visible:ring-2 focus-visible:ring-primary ring-offset-2 ring-offset-background">
         <div className="relative w-1/3 shrink-0">
-          <Image
-            src={anime.poster || '/placeholder.jpg'}
-            alt={anime.title}
-            width={120}
-            height={180}
-            className="object-cover w-full h-full"
-            unoptimized
-          />
+          {anime.poster ? (
+            <Image
+              src={anime.poster}
+              alt={anime.title}
+              width={120}
+              height={180}
+              className="object-cover w-full h-full"
+              unoptimized
+            />
+          ) : (
+            <Skeleton className="w-full h-full" />
+          )}
         </div>
         <div className="flex flex-col justify-between p-4 w-2/3">
             <div>
