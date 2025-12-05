@@ -2,7 +2,7 @@ import { getAnimeDetails } from '@/lib/api';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
-import { Star, Tv, Calendar, Clock, Film, Users } from 'lucide-react';
+import { Star, Tv, Calendar, Clock, Film, Users, ChevronsRight } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface AnimeDetailPageProps {
   params: {
@@ -47,20 +48,32 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
   }
 
   const { data: anime } = animeDetails;
+  const latestEpisode = anime.episodeList?.[0];
 
   return (
     <div className="container py-8 md:py-12">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
         <div className="md:col-span-4 lg:col-span-3">
           <div className="sticky top-24">
-            <Image
-              src={anime.poster}
-              alt={anime.title}
-              width={400}
-              height={600}
-              className="w-full h-auto rounded-xl shadow-lg object-cover"
-              unoptimized
-            />
+            {anime.poster ? (
+              <Image
+                src={anime.poster}
+                alt={anime.title}
+                width={400}
+                height={600}
+                className="w-full h-auto rounded-xl shadow-lg object-cover"
+                unoptimized
+              />
+            ) : (
+              <Skeleton className="w-full h-auto aspect-[2/3] rounded-xl shadow-lg" />
+            )}
+            {latestEpisode && (
+              <Button asChild className="w-full mt-4">
+                <Link href={`/episode/${latestEpisode.episodeId}`}>
+                  Watch Episode {latestEpisode.title}
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
         <div className="md:col-span-8 lg:col-span-9">
@@ -119,20 +132,22 @@ export default async function AnimeDetailPage({ params }: AnimeDetailPageProps) 
             </div>
           </div>
           
-          <Accordion type="single" collapsible className="w-full" defaultValue="episodes">
-            <AccordionItem value="episodes">
-              <AccordionTrigger className="text-2xl font-headline font-bold">Episodes</AccordionTrigger>
-              <AccordionContent>
-                <div className="max-h-[400px] overflow-y-auto pr-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-                  {anime.episodeList.map(ep => (
-                    <Button key={ep.episodeId} variant="outline" asChild>
-                      <Link href={`/episode/${ep.episodeId}`}>Eps {ep.title}</Link>
-                    </Button>
-                  ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+          {anime.episodeList && anime.episodeList.length > 0 && (
+            <Accordion type="single" collapsible className="w-full" defaultValue="episodes">
+              <AccordionItem value="episodes">
+                <AccordionTrigger className="text-2xl font-headline font-bold">Episodes</AccordionTrigger>
+                <AccordionContent>
+                  <div className="max-h-[400px] overflow-y-auto pr-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                    {anime.episodeList.map(ep => (
+                      <Button key={ep.episodeId} variant="outline" asChild>
+                        <Link href={`/episode/${ep.episodeId}`}>Eps {ep.title}</Link>
+                      </Button>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          )}
 
         </div>
       </div>
