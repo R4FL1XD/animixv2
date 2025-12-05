@@ -75,17 +75,6 @@ function AnimeCard({ anime }: AnimeCardProps) {
 
                     {/* Info Overlay */}
                     <div className="absolute inset-0 top-auto h-2/3 bg-gradient-to-t from-black/90 to-transparent p-3 flex flex-col justify-end pointer-events-none">
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                             {anime.genreList && anime.genreList.length > 0 && (
-                                 <div className="flex flex-wrap gap-1.5 mb-2">
-                                    {anime.genreList.slice(0, 3).map((genre) => (
-                                        <Badge key={genre.genreId} variant="secondary" className="text-xs backdrop-blur-sm bg-white/10 border-white/20">
-                                            {genre.title}
-                                        </Badge>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
                         <h3 className="font-headline text-base font-bold text-white drop-shadow-md leading-tight truncate">
                             {anime.title}
                         </h3>
