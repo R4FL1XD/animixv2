@@ -80,10 +80,14 @@ export default function EpisodeDetailPage() {
 
       if (initialServer) {
         setActiveServerId(initialServer.serverId);
+        if (details.data.defaultStreamingUrl) {
+            setStreamingUrl(details.data.defaultStreamingUrl);
+        }
       } else {
         const firstServer = details.data.server.qualities.find(q => q.serverList.length > 0)?.serverList[0];
         if (firstServer) {
           setActiveServerId(firstServer.serverId);
+          handleServerClick(firstServer.serverId, firstServer.title, details.data.defaultStreamingUrl, details.data);
         }
       }
 
@@ -99,13 +103,14 @@ export default function EpisodeDetailPage() {
     fetchDetails();
   }, [id]);
 
-  const handleServerClick = async (serverId: string, serverTitle: string) => {
+  const handleServerClick = async (serverId: string, serverTitle: string, defaultUrl?: string, episodeData?: EpisodeDetail) => {
+    const currentEpisode = episodeData || episodeDetails;
     setLoadingStream(true);
     setActiveServerId(serverId);
 
     if (serverTitle.toLowerCase().includes('blogspot')) {
-        if(episodeDetails?.defaultStreamingUrl) {
-            setStreamingUrl(episodeDetails.defaultStreamingUrl);
+        if(currentEpisode?.defaultStreamingUrl) {
+            setStreamingUrl(currentEpisode.defaultStreamingUrl);
         }
         setLoadingStream(false);
         return;
@@ -168,13 +173,13 @@ export default function EpisodeDetailPage() {
 
       <div className="flex justify-between items-center mb-8 gap-2 md:gap-4">
         {episode.hasPrevEpisode && episode.prevEpisode ? (
-          <Button asChild variant="outline" className="flex-shrink-0" size="icon">
+          <Button asChild variant="outline" className="flex-shrink-0">
             <Link href={`/episode/${episode.prevEpisode.episodeId}`}>
-              <ArrowLeft className="h-5 w-5" />
-              <span className="sr-only">Previous Episode</span>
+              <ArrowLeft className="h-5 w-5 md:mr-2" />
+              <span className="hidden md:inline">Prev Episode</span>
             </Link>
           </Button>
-        ) : <div className="flex-shrink-0 w-10" />}
+        ) : <div className="w-[136px] flex-shrink-0" />}
         
         {animeDetails && animeDetails.episodeList.length > 0 && (
           <Select
@@ -182,7 +187,7 @@ export default function EpisodeDetailPage() {
             onValueChange={(value) => router.push(`/episode/${value}`)}
           >
             <SelectTrigger className="w-full max-w-xs mx-auto">
-              <Menu className="mr-2" />
+              <Menu className="h-5 w-5 mr-2" />
               <SelectValue placeholder="Select an episode" />
             </SelectTrigger>
             <SelectContent>
@@ -196,13 +201,20 @@ export default function EpisodeDetailPage() {
         )}
 
         {episode.hasNextEpisode && episode.nextEpisode ? (
-          <Button asChild variant="outline" className="flex-shrink-0" size="icon">
+          <Button asChild variant="outline" className="flex-shrink-0">
             <Link href={`/episode/${episode.nextEpisode.episodeId}`}>
-              <ArrowRight className="h-5 w-5" />
-               <span className="sr-only">Next Episode</span>
+               <span className="hidden md:inline">Next Episode</span>
+               <ArrowRight className="h-5 w-5 md:ml-2" />
             </Link>
           </Button>
-        ) : <div className="flex-shrink-0 w-10" />}
+        ) : (
+          <Button asChild variant="outline" className="flex-shrink-0 bg-primary/10 border-primary/20 text-primary hover:bg-primary/20">
+             <Link href="/popular">
+               <span className="hidden md:inline">Explore Popular</span>
+               <ChevronsRight className="h-5 w-5 md:ml-2" />
+            </Link>
+          </Button>
+        )}
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -286,4 +298,3 @@ export default function EpisodeDetailPage() {
     </div>
   );
 }
-
