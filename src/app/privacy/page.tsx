@@ -1,3 +1,4 @@
+
 // A simple privacy policy page.
 // You can edit this file to add your own privacy policy.
 export default function PrivacyPage() {
