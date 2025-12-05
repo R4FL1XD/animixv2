@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { Menu, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { useState, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '../ui/button';
 import {
   Sheet,
@@ -17,19 +17,33 @@ import { ThemeToggle } from '../theme-toggle';
 import Image from 'next/image';
 
 export default function Header() {
-  const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
+  useEffect(() => {
+    // Set initial search query from URL params on component mount
+    setSearchQuery(searchParams.get('search') || '');
+  }, [searchParams]);
 
-  const handleSearch = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/?search=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery('');
-      setIsSheetOpen(false);
-    }
-  };
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (searchQuery) {
+        router.push(`/?search=${encodeURIComponent(searchQuery)}`);
+      } else {
+        // If the query is cleared, go back to the homepage
+        const currentSearch = searchParams.get('search');
+        if (currentSearch) {
+          router.push('/');
+        }
+      }
+    }, 500); // 500ms debounce delay
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery, router, searchParams]);
 
   const handleLinkClick = () => {
     setIsSheetOpen(false);
@@ -177,7 +191,7 @@ export default function Header() {
 
 
         <div className="flex flex-1 items-center justify-end space-x-2">
-            <form onSubmit={handleSearch} className="relative w-full max-w-xs">
+            <div className="relative w-full max-w-xs">
                 <Input
                     type="search"
                     placeholder="Search anime..."
@@ -185,16 +199,13 @@ export default function Header() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <Button
-                    type="submit"
-                    size="icon"
-                    variant="ghost"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full text-muted-foreground hover:text-primary"
+                <div
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full text-muted-foreground flex items-center justify-center pointer-events-none"
                 >
                     <Search className="h-4 w-4" />
                     <span className="sr-only">Search</span>
-                </Button>
-            </form>
+                </div>
+            </div>
           <ThemeToggle />
         </div>
       </div>
