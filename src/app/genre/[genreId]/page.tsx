@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { getAnimeByGenre } from '@/lib/api';
 import type { Anime } from '@/lib/types';
 import AnimeCard from '@/components/anime-card';
@@ -10,11 +10,18 @@ import { Button } from '@/components/ui/button';
 
 export default function GenrePage() {
   const params = useParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const genreId = Array.isArray(params.genreId) ? params.genreId[0] : params.genreId;
 
   const [animes, setAnimes] = useState<Anime[]>([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
+  
+  const initialPage = parseInt(searchParams.get('page') || '1');
+  const [page, setPage] = useState(initialPage);
+
   const [hasNextPage, setHasNextPage] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   
@@ -23,15 +30,27 @@ export default function GenrePage() {
   useEffect(() => {
     if (genreId) {
       setLoading(true);
-      getAnimeByGenre(genreId, 1).then((data) => {
-        if (data?.data.animeList) {
-          setAnimes(data.data.animeList);
-          setHasNextPage(data.pagination.hasNextPage);
+      const fetchInitialData = async () => {
+        const allAnimes: Anime[] = [];
+        let nextHasPage = false;
+        for (let i = 1; i <= initialPage; i++) {
+          const data = await getAnimeByGenre(genreId, i);
+          if (data?.data.animeList) {
+            allAnimes.push(...data.data.animeList);
+            nextHasPage = data.pagination.hasNextPage;
+          } else {
+            nextHasPage = false;
+            break;
+          }
         }
+        setAnimes(allAnimes);
+        setHasNextPage(nextHasPage);
         setLoading(false);
-      });
+      };
+
+      fetchInitialData();
     }
-  }, [genreId]);
+  }, [genreId, initialPage]);
 
   const handleLoadMore = useCallback(() => {
     if (loadingMore || !hasNextPage || !genreId) return;
@@ -43,14 +62,14 @@ export default function GenrePage() {
         setAnimes((prev) => [...prev, ...data.data.animeList]);
         setPage(nextPage);
         setHasNextPage(data.pagination.hasNextPage);
+        router.replace(`${pathname}?page=${nextPage}`, { scroll: false });
       }
       setLoadingMore(false);
     });
-  }, [loadingMore, hasNextPage, page, genreId]);
+  }, [loadingMore, hasNextPage, page, genreId, router, pathname]);
 
   useEffect(() => {
     const handleScroll = () => {
-      // Check if the user has scrolled to the bottom of the page
       if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 200) {
         handleLoadMore();
       }
