@@ -179,7 +179,12 @@ export default function EpisodeDetailPage() {
               <span className="hidden md:inline">Prev Episode</span>
             </Link>
           </Button>
-        ) : <div className="w-[136px] flex-shrink-0" />}
+        ) : (
+           <Button variant="outline" className="flex-shrink-0" disabled>
+              <ArrowLeft className="h-5 w-5 md:mr-2" />
+              <span className="hidden md:inline">Prev Episode</span>
+          </Button>
+        )}
         
         {animeDetails && animeDetails.episodeList.length > 0 && (
           <Select
@@ -208,11 +213,9 @@ export default function EpisodeDetailPage() {
             </Link>
           </Button>
         ) : (
-          <Button asChild variant="outline" className="flex-shrink-0 bg-primary/10 border-primary/20 text-primary hover:bg-primary/20">
-             <Link href="/popular">
-               <span className="hidden md:inline">Explore Popular</span>
-               <ChevronsRight className="h-5 w-5 md:ml-2" />
-            </Link>
+           <Button variant="outline" className="flex-shrink-0" disabled>
+               <span className="hidden md:inline">Next Episode</span>
+               <ArrowRight className="h-5 w-5 md:ml-2" />
           </Button>
         )}
       </div>
