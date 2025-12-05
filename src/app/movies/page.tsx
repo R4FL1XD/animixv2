@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getMovies } from '@/lib/api';
 import type { Anime } from '@/lib/types';
 import AnimeCard from '@/components/anime-card';
 import { Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 export default function MoviesPage() {
   const [animes, setAnimes] = useState<Anime[]>([]);
@@ -25,20 +24,32 @@ export default function MoviesPage() {
     });
   }, []);
 
-  const handleLoadMore = () => {
-    if (hasNextPage) {
-      setLoadingMore(true);
-      const nextPage = page + 1;
-      getMovies(nextPage).then((data) => {
-        if (data?.data.animeList) {
-          setAnimes((prev) => [...prev, ...data.data.animeList]);
-          setPage(nextPage);
-          setHasNextPage(data.pagination.hasNextPage);
-        }
-        setLoadingMore(false);
-      });
-    }
-  };
+  const handleLoadMore = useCallback(() => {
+    if (loadingMore || !hasNextPage) return;
+    
+    setLoadingMore(true);
+    const nextPage = page + 1;
+    getMovies(nextPage).then((data) => {
+      if (data?.data.animeList) {
+        setAnimes((prev) => [...prev, ...data.data.animeList]);
+        setPage(nextPage);
+        setHasNextPage(data.pagination.hasNextPage);
+      }
+      setLoadingMore(false);
+    });
+  }, [loadingMore, hasNextPage, page]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 200) {
+        handleLoadMore();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleLoadMore]);
+
 
   return (
     <div className="container py-8 md:py-12">
@@ -58,11 +69,9 @@ export default function MoviesPage() {
                   <AnimeCard key={`${anime.animeId}-${index}`} anime={anime} />
                 ))}
               </div>
-              {hasNextPage && (
+              {loadingMore && (
                 <div className="flex justify-center mt-8">
-                  <Button onClick={handleLoadMore} disabled={loadingMore}>
-                    {loadingMore ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Load More'}
-                  </Button>
+                  <Loader2 className="h-8 w-8 animate-spin" />
                 </div>
               )}
             </>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { getAnimeByGenre } from '@/lib/api';
 import type { Anime } from '@/lib/types';
@@ -33,20 +33,32 @@ export default function GenrePage() {
     }
   }, [genreId]);
 
-  const handleLoadMore = () => {
-    if (genreId && hasNextPage) {
-      setLoadingMore(true);
-      const nextPage = page + 1;
-      getAnimeByGenre(genreId, nextPage).then((data) => {
-        if (data?.data.animeList) {
-          setAnimes((prev) => [...prev, ...data.data.animeList]);
-          setPage(nextPage);
-          setHasNextPage(data.pagination.hasNextPage);
-        }
-        setLoadingMore(false);
-      });
-    }
-  };
+  const handleLoadMore = useCallback(() => {
+    if (loadingMore || !hasNextPage || !genreId) return;
+
+    setLoadingMore(true);
+    const nextPage = page + 1;
+    getAnimeByGenre(genreId, nextPage).then((data) => {
+      if (data?.data.animeList) {
+        setAnimes((prev) => [...prev, ...data.data.animeList]);
+        setPage(nextPage);
+        setHasNextPage(data.pagination.hasNextPage);
+      }
+      setLoadingMore(false);
+    });
+  }, [loadingMore, hasNextPage, page, genreId]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Check if the user has scrolled to the bottom of the page
+      if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 200) {
+        handleLoadMore();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleLoadMore]);
 
   return (
     <div className="container py-8 md:py-12">
@@ -66,11 +78,9 @@ export default function GenrePage() {
                   <AnimeCard key={`${anime.animeId}-${index}`} anime={anime} />
                 ))}
               </div>
-              {hasNextPage && (
+              {loadingMore && (
                 <div className="flex justify-center mt-8">
-                  <Button onClick={handleLoadMore} disabled={loadingMore}>
-                    {loadingMore ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Load More'}
-                  </Button>
+                  <Loader2 className="h-8 w-8 animate-spin" />
                 </div>
               )}
             </>
