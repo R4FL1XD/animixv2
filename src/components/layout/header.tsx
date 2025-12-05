@@ -1,10 +1,8 @@
 "use client";
 
 import Link from 'next/link';
-import { Menu, Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { Menu } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '../ui/button';
 import {
   Sheet,
@@ -15,35 +13,11 @@ import {
 import { Separator } from '../ui/separator';
 import { ThemeToggle } from '../theme-toggle';
 import Image from 'next/image';
+import SearchBar from './search-bar';
+import { Suspense } from 'react';
 
 export default function Header() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-
-  useEffect(() => {
-    // Set initial search query from URL params on component mount
-    setSearchQuery(searchParams.get('search') || '');
-  }, [searchParams]);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      if (searchQuery) {
-        router.push(`/?search=${encodeURIComponent(searchQuery)}`);
-      } else {
-        // If the query is cleared, go back to the homepage
-        const currentSearch = searchParams.get('search');
-        if (currentSearch) {
-          router.push('/');
-        }
-      }
-    }, 500); // 500ms debounce delay
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [searchQuery, router, searchParams]);
 
   const handleLinkClick = () => {
     setIsSheetOpen(false);
@@ -191,21 +165,9 @@ export default function Header() {
 
 
         <div className="flex flex-1 items-center justify-end space-x-2">
-            <div className="relative w-full max-w-xs">
-                <Input
-                    type="search"
-                    placeholder="Search anime..."
-                    className="h-9 w-full rounded-full border bg-transparent pl-4 pr-10 focus:border-primary transition-colors"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <div
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full text-muted-foreground flex items-center justify-center pointer-events-none"
-                >
-                    <Search className="h-4 w-4" />
-                    <span className="sr-only">Search</span>
-                </div>
-            </div>
+            <Suspense fallback={<div className="h-9 w-full max-w-xs animate-pulse rounded-full bg-muted" />}>
+              <SearchBar />
+            </Suspense>
           <ThemeToggle />
         </div>
       </div>
