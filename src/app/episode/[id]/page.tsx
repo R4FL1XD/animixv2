@@ -2,7 +2,7 @@
 'use client';
 
 import { getEpisodeDetails, getServerUrl, getAnimeDetails } from '@/lib/api';
-import { notFound, useParams } from 'next/navigation';
+import { notFound, useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Download, Server, Loader2, Home, ChevronsRight } from 'lucide-react';
@@ -17,6 +17,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AnimeCarousel from '@/components/anime-carousel';
 import type { EpisodeDetail, AnimeDetail } from '@/lib/types';
 import { useState, useEffect } from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
 
 const Breadcrumb = ({ animeTitle, episodeTitle, animeId }: { animeTitle: string; episodeTitle: string; animeId: string; }) => {
   return (
@@ -38,6 +46,7 @@ const Breadcrumb = ({ animeTitle, episodeTitle, animeId }: { animeTitle: string;
 
 export default function EpisodeDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const { id } = params;
 
   const [episodeDetails, setEpisodeDetails] = useState<EpisodeDetail | null>(null);
@@ -51,7 +60,10 @@ export default function EpisodeDetailPage() {
     async function fetchDetails() {
       if (typeof id !== 'string') return;
       setLoading(true);
-      const details = await getEpisodeDetails(id);
+      
+      const detailsPromise = getEpisodeDetails(id);
+      
+      const details = await detailsPromise;
       if (!details || !details.data) {
         notFound();
         return;
@@ -90,15 +102,15 @@ export default function EpisodeDetailPage() {
   const handleServerClick = async (serverId: string, serverTitle: string) => {
     setLoadingStream(true);
     setActiveServerId(serverId);
-    
+
     if (serverTitle.toLowerCase().includes('blogspot')) {
         if(episodeDetails?.defaultStreamingUrl) {
             setStreamingUrl(episodeDetails.defaultStreamingUrl);
         }
         setLoadingStream(false);
-        return; 
+        return;
     }
-
+    
     try {
         const serverData = await getServerUrl(serverId);
         if (serverData && serverData.data.url) {
@@ -120,6 +132,7 @@ export default function EpisodeDetailPage() {
   }
   
   const episode = episodeDetails;
+  const currentEpisodeId = typeof id === 'string' ? id : '';
 
   return (
     <div className="container py-8 md:py-12">
@@ -153,21 +166,40 @@ export default function EpisodeDetailPage() {
         )}
       </div>
 
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-8 gap-2 md:gap-4">
         {episode.hasPrevEpisode && episode.prevEpisode ? (
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" className="flex-shrink-0">
             <Link href={`/episode/${episode.prevEpisode.episodeId}`}>
-              <ChevronLeft className="mr-2 h-4 w-4" /> Prev Episode
+              <ChevronLeft className="mr-2 h-4 w-4" /> Prev
             </Link>
           </Button>
-        ) : <div />}
+        ) : <div className="flex-shrink-0" />}
+        
+        {animeDetails && animeDetails.episodeList.length > 0 && (
+          <Select
+            value={currentEpisodeId}
+            onValueChange={(value) => router.push(`/episode/${value}`)}
+          >
+            <SelectTrigger className="w-full max-w-xs mx-auto">
+              <SelectValue placeholder="Select an episode" />
+            </SelectTrigger>
+            <SelectContent>
+              {animeDetails.episodeList.map(ep => (
+                <SelectItem key={ep.episodeId} value={ep.episodeId}>
+                  Episode {ep.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+
         {episode.hasNextEpisode && episode.nextEpisode ? (
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" className="flex-shrink-0">
             <Link href={`/episode/${episode.nextEpisode.episodeId}`}>
-              Next Episode <ChevronRight className="ml-2 h-4 w-4" />
+              Next <ChevronRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
-        ) : <div />}
+        ) : <div className="flex-shrink-0" />}
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
