@@ -61,7 +61,7 @@ export default function Header() {
             </Link>
             <nav className="flex items-center gap-6 text-sm font-medium">
             <Link
-                href="/browse"
+                href="/genre"
                 className="transition-colors hover:text-foreground/80 text-foreground"
             >
                 Genre
@@ -128,7 +128,7 @@ export default function Header() {
             <Separator className="my-4" />
             <div className="flex flex-col space-y-3 px-6">
                 <Link
-                    href="/browse"
+                    href="/genre"
                     onClick={handleLinkClick}
                     className="transition-colors hover:text-primary"
                 >

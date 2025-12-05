@@ -27,7 +27,7 @@ const genres = [
     { id: "horror", name: "Horror" },
 ];
 
-export default function BrowsePage() {
+export default function GenreListPage() {
   return (
     <div className="container py-8 md:py-12">
       <h1 className="text-3xl md:text-4xl font-headline font-bold mb-8">
@@ -36,7 +36,7 @@ export default function BrowsePage() {
       <div className="flex flex-wrap gap-4">
         {genres.map((genre) => (
           <Button key={genre.id} asChild variant="outline" size="lg">
-            <Link href={`/browse/${genre.id}`}>{genre.name}</Link>
+            <Link href={`/genre/${genre.id}`}>{genre.name}</Link>
           </Button>
         ))}
       </div>
