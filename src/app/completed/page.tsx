@@ -5,44 +5,24 @@ import { getCompletedAnime } from '@/lib/api';
 import type { Anime } from '@/lib/types';
 import AnimeCard from '@/components/anime-card';
 import { Loader2 } from 'lucide-react';
-import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 
 export default function CompletedPage() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
   const [animes, setAnimes] = useState<Anime[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  const initialPage = parseInt(searchParams.get('page') || '1');
-  const [page, setPage] = useState(initialPage);
-
+  const [page, setPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     setLoading(true);
-    const fetchInitialData = async () => {
-      const allAnimes: Anime[] = [];
-      let nextHasPage = false;
-      for (let i = 1; i <= initialPage; i++) {
-        const data = await getCompletedAnime(i);
-        if (data?.data.animeList) {
-          allAnimes.push(...data.data.animeList);
-          nextHasPage = data.pagination.hasNextPage;
-        } else {
-          nextHasPage = false;
-          break;
-        }
+    getCompletedAnime(1).then((data) => {
+      if (data?.data.animeList) {
+        setAnimes(data.data.animeList);
+        setHasNextPage(data.pagination.hasNextPage);
       }
-      setAnimes(allAnimes);
-      setHasNextPage(nextHasPage);
       setLoading(false);
-    };
-
-    fetchInitialData();
-  }, [initialPage]);
+    });
+  }, []);
 
   const handleLoadMore = useCallback(() => {
     if (loadingMore || !hasNextPage) return;
@@ -54,11 +34,10 @@ export default function CompletedPage() {
         setAnimes((prev) => [...prev, ...data.data.animeList]);
         setPage(nextPage);
         setHasNextPage(data.pagination.hasNextPage);
-        router.replace(`${pathname}?page=${nextPage}`, { scroll: false });
       }
       setLoadingMore(false);
     });
-  }, [loadingMore, hasNextPage, page, router, pathname]);
+  }, [loadingMore, hasNextPage, page]);
 
   useEffect(() => {
     const handleScroll = () => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useState, useEffect, Suspense, useCallback } from 'react';
 import { searchAnime } from '@/lib/api';
 import type { Anime } from '@/lib/types';
@@ -8,46 +8,32 @@ import AnimeCard from '@/components/anime-card';
 import { Loader2 } from 'lucide-react';
 
 function SearchPageComponent() {
-  const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
-  
   const q = searchParams.get('search');
-  const initialPage = parseInt(searchParams.get('page') || '1');
-
   const [results, setResults] = useState<Anime[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(initialPage);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     if (q) {
       setLoading(true);
-      const fetchInitialData = async () => {
-        const allAnimes: Anime[] = [];
-        let nextHasPage = false;
-        for (let i = 1; i <= initialPage; i++) {
-          const data = await searchAnime(q, i);
-          if (data?.data.animeList) {
-            allAnimes.push(...data.data.animeList);
-            nextHasPage = data.pagination.hasNextPage;
-          } else {
-            nextHasPage = false;
-            break;
-          }
+      setPage(1);
+      setResults([]);
+      searchAnime(q, 1).then((data) => {
+        if (data?.data.animeList) {
+          setResults(data.data.animeList);
+          setHasNextPage(data.pagination.hasNextPage);
+        } else {
+            setHasNextPage(false);
         }
-        setResults(allAnimes);
-        setHasNextPage(nextHasPage);
-        setPage(initialPage);
         setLoading(false);
-      };
-      fetchInitialData();
+      });
     } else {
-        setLoading(false);
         setResults([]);
     }
-  }, [q, initialPage]);
+  }, [q]);
 
   const handleLoadMore = useCallback(() => {
     if (!q || !hasNextPage || loadingMore) return;
@@ -59,15 +45,10 @@ function SearchPageComponent() {
         setResults((prevResults) => [...prevResults, ...data.data.animeList]);
         setPage(nextPage);
         setHasNextPage(data.pagination.hasNextPage);
-        const current = new URLSearchParams(Array.from(searchParams.entries()));
-        current.set("page", String(nextPage));
-        const search = current.toString();
-        const query = search ? `?${search}` : "";
-        router.replace(`${pathname}${query}`, { scroll: false });
       }
       setLoadingMore(false);
     });
-  }, [q, hasNextPage, loadingMore, page, router, pathname, searchParams]);
+  }, [q, hasNextPage, loadingMore, page]);
 
   useEffect(() => {
     const handleScroll = () => {
