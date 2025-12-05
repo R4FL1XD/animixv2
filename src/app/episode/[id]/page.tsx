@@ -5,7 +5,7 @@ import { getEpisodeDetails, getServerUrl, getAnimeDetails } from '@/lib/api';
 import { notFound, useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, Download, Server, Loader2, Home, ChevronsRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Download, Server, Loader2, Home, ChevronsRight, Menu } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
@@ -168,12 +168,13 @@ export default function EpisodeDetailPage() {
 
       <div className="flex justify-between items-center mb-8 gap-2 md:gap-4">
         {episode.hasPrevEpisode && episode.prevEpisode ? (
-          <Button asChild variant="outline" className="flex-shrink-0">
+          <Button asChild variant="outline" className="flex-shrink-0" size="icon">
             <Link href={`/episode/${episode.prevEpisode.episodeId}`}>
-              <ChevronLeft className="mr-2 h-4 w-4" /> Prev
+              <ArrowLeft className="h-5 w-5" />
+              <span className="sr-only">Previous Episode</span>
             </Link>
           </Button>
-        ) : <div className="flex-shrink-0" />}
+        ) : <div className="flex-shrink-0 w-10" />}
         
         {animeDetails && animeDetails.episodeList.length > 0 && (
           <Select
@@ -181,6 +182,7 @@ export default function EpisodeDetailPage() {
             onValueChange={(value) => router.push(`/episode/${value}`)}
           >
             <SelectTrigger className="w-full max-w-xs mx-auto">
+              <Menu className="mr-2" />
               <SelectValue placeholder="Select an episode" />
             </SelectTrigger>
             <SelectContent>
@@ -194,12 +196,13 @@ export default function EpisodeDetailPage() {
         )}
 
         {episode.hasNextEpisode && episode.nextEpisode ? (
-          <Button asChild variant="outline" className="flex-shrink-0">
+          <Button asChild variant="outline" className="flex-shrink-0" size="icon">
             <Link href={`/episode/${episode.nextEpisode.episodeId}`}>
-              Next <ChevronRight className="ml-2 h-4 w-4" />
+              <ArrowRight className="h-5 w-5" />
+               <span className="sr-only">Next Episode</span>
             </Link>
           </Button>
-        ) : <div className="flex-shrink-0" />}
+        ) : <div className="flex-shrink-0 w-10" />}
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -283,3 +286,4 @@ export default function EpisodeDetailPage() {
     </div>
   );
 }
+
