@@ -8,6 +8,9 @@ import { ThemeProvider } from '@/components/theme-provider';
 export const metadata: Metadata = {
   title: 'Animix',
   description: 'Your world of anime, unbound.',
+  icons: {
+    icon: 'https://i.ibb.co/0VsSsQ45/IMG-20251201-090159.jpg',
+  },
 };
 
 export default function RootLayout({
@@ -18,7 +21,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="icon" href="https://i.ibb.co/0VsSsQ45/IMG-20251201-090159.jpg" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
