@@ -58,6 +58,7 @@ export default function EpisodeDetailPage() {
       }
       setEpisodeDetails(details.data);
       
+      // Set initial streaming URL to default if available
       if (details.data.defaultStreamingUrl) {
           setStreamingUrl(details.data.defaultStreamingUrl);
       }
@@ -72,7 +73,7 @@ export default function EpisodeDetailPage() {
         const firstServer = details.data.server.qualities.find(q => q.serverList.length > 0)?.serverList[0];
         if (firstServer) {
           setActiveServerId(firstServer.serverId);
-          handleServerClick(firstServer.serverId, firstServer.title);
+          // Don't auto-load non-blogspot servers to avoid unnecessary API calls on page load
         }
       }
 
@@ -92,12 +93,16 @@ export default function EpisodeDetailPage() {
     setLoadingStream(true);
     setActiveServerId(serverId);
     
-    if (serverTitle.toLowerCase().includes('blogspot') && episodeDetails?.defaultStreamingUrl) {
-        setStreamingUrl(episodeDetails.defaultStreamingUrl);
+    // If blogspot, use the default URL and stop.
+    if (serverTitle.toLowerCase().includes('blogspot')) {
+        if(episodeDetails?.defaultStreamingUrl) {
+            setStreamingUrl(episodeDetails.defaultStreamingUrl);
+        }
         setLoadingStream(false);
         return; 
     }
 
+    // For other servers, fetch the URL
     try {
         const serverData = await getServerUrl(serverId);
         if (serverData && serverData.data.url) {
