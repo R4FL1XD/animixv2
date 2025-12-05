@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from 'next/image';
@@ -8,6 +9,7 @@ import type { Anime } from '@/lib/types';
 import { PlayCircle, Calendar, Star } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { getAnimeDetails } from '@/lib/api';
+import { Skeleton } from './ui/skeleton';
 
 interface AnimeCardProps {
   anime: Anime;
@@ -54,14 +56,18 @@ function AnimeCard({ anime }: AnimeCardProps) {
         <Link href={linkHref} className="group block outline-none cursor-pointer w-full h-full" aria-label={`View details for ${anime.title}`}>
             <Card className="h-full w-full overflow-hidden transition-all duration-300 ease-in-out group-hover:shadow-primary/20 group-hover:-translate-y-1 group-focus-visible:shadow-primary/20 group-focus-visible:-translate-y-1 group-focus-visible:ring-2 group-focus-visible:ring-primary ring-offset-2 ring-offset-background">
                 <CardContent className="p-0 relative">
-                    <Image
-                        src={anime.poster}
-                        alt={anime.title}
-                        width={300}
-                        height={450}
-                        className="object-cover w-full h-auto aspect-[2/3] transition-transform duration-300 group-hover:scale-105"
-                        unoptimized
-                    />
+                    {anime.poster ? (
+                        <Image
+                            src={anime.poster}
+                            alt={anime.title}
+                            width={300}
+                            height={450}
+                            className="object-cover w-full h-auto aspect-[2/3] transition-transform duration-300 group-hover:scale-105"
+                            unoptimized
+                        />
+                    ) : (
+                        <Skeleton className="w-full h-auto aspect-[2/3]" />
+                    )}
                     
                     {/* Clickable Play Button Overlay */}
                     <div 
@@ -111,3 +117,4 @@ function AnimeCard({ anime }: AnimeCardProps) {
 }
 
 export default AnimeCard;
+
