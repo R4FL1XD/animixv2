@@ -53,12 +53,12 @@ export default function Footer() {
                <div className="flex items-center space-x-2">
                   <Button variant="ghost" size="icon" asChild>
                     <a href="#" aria-label="Twitter">
-                        <Twitter className="h-5 w-5" />
+                        <Twitter className="h-6 w-6" />
                     </a>
                   </Button>
                    <Button variant="ghost" size="icon" asChild>
                     <a href="#" aria-label="GitHub">
-                        <Github className="h-5 w-5" />
+                        <Github className="h-6 w-6" />
                     </a>
                   </Button>
                </div>
