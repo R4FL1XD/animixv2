@@ -30,17 +30,6 @@ async function fetchWithRetry(url: string, options: RequestInit, retries = 3, ba
   throw new Error('API request failed after multiple retries.');
 }
 
-
-function addGenreListToAnime(anime: Anime, details: AnimeDetailData): Anime {
-    if (details.data && details.data.genreList) {
-        return {
-            ...anime,
-            genreList: details.data.genreList,
-        };
-    }
-    return anime;
-}
-
 export async function getHomeData(): Promise<HomeData | null> {
   try {
     const res = await fetchWithRetry(`${API_BASE_URL}/anime/samehadaku/home`, {
@@ -53,19 +42,6 @@ export async function getHomeData(): Promise<HomeData | null> {
     }
 
     let data: HomeData = await res.json();
-    
-    // Enrich recent anime with genre data
-    if (data.data && data.data.recent && data.data.recent.animeList) {
-        const enrichedRecentList = await Promise.all(
-            data.data.recent.animeList.map(async (anime) => {
-                const details = await getAnimeDetails(anime.animeId);
-                return details ? addGenreListToAnime(anime, details) : anime;
-            })
-        );
-        data.data.recent.animeList = enrichedRecentList;
-    }
-
-
     return data;
   } catch (error) {
     console.error('Error fetching home data:', error);

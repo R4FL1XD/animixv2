@@ -7,10 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Play, Info } from 'lucide-react';
 import { getAnimeDetails } from '@/lib/api';
 import { useRouter } from 'next/navigation';
-import { useState, useRef } from 'react';
-import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
-import Autoplay from "embla-carousel-autoplay";
-
+import { useState, useRef, useEffect } from 'react';
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/components/ui/carousel';
 
 interface HeroSectionProps {
   animes: Anime[];
@@ -18,9 +16,27 @@ interface HeroSectionProps {
 
 export default function HeroSection({ animes }: HeroSectionProps) {
   const router = useRouter();
-  const plugin = useRef(
-    Autoplay({ delay: 5000, stopOnInteraction: true })
-  );
+  const [api, setApi] = useState<CarouselApi>()
+  const [current, setCurrent] = useState(0)
+
+  useEffect(() => {
+    if (!api) {
+      return
+    }
+ 
+    setCurrent(api.selectedScrollSnap())
+ 
+    const handleSelect = () => {
+      setCurrent(api.selectedScrollSnap())
+    }
+
+    api.on("select", handleSelect)
+ 
+    return () => {
+      api.off("select", handleSelect)
+    }
+  }, [api])
+
 
   if (!animes || animes.length === 0) return null;
 
@@ -41,10 +57,8 @@ export default function HeroSection({ animes }: HeroSectionProps) {
 
   return (
     <Carousel 
+      setApi={setApi}
       opts={{ loop: true }}
-      plugins={[plugin.current]}
-      onMouseEnter={plugin.current.stop}
-      onMouseLeave={plugin.current.reset}
       className="w-full"
     >
       <CarouselContent>
@@ -52,14 +66,16 @@ export default function HeroSection({ animes }: HeroSectionProps) {
           <CarouselItem key={anime.animeId}>
             <section className="relative h-[60vh] md:h-[85vh] w-full">
               <div className="absolute inset-0">
-                <Image
-                  src={anime.poster}
-                  alt={`Poster for ${anime.title}`}
-                  fill
-                  className="object-cover object-center"
-                  priority
-                  unoptimized
-                />
+                {anime.poster ? (
+                  <Image
+                    src={anime.poster}
+                    alt={`Poster for ${anime.title}`}
+                    fill
+                    className="object-cover object-center"
+                    priority
+                    unoptimized
+                  />
+                ) : <div className='w-full h-full bg-muted'/>}
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
                 <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent" />
               </div>
@@ -95,6 +111,17 @@ export default function HeroSection({ animes }: HeroSectionProps) {
           </CarouselItem>
         ))}
       </CarouselContent>
+       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+        {animes.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => api?.scrollTo(i)}
+            className={`h-2 w-2 rounded-full transition-all ${
+              i === current ? 'w-4 bg-primary' : 'bg-muted/50'
+            }`}
+          />
+        ))}
+      </div>
     </Carousel>
   );
 }

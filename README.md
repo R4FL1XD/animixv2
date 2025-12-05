@@ -1,14 +1,11 @@
-# Firebase Studio
+# Animix
 
-This is a NextJS starter in Firebase Studio.
+This is a Next.js project for streaming anime, ready for deployment.
 
-To get started, take a look at src/app/page.tsx.
-# animix
-# animix
-# animix
-# animix
-# animix
-# animixv2
-# animixv2
-# animix
-# animixv2
+To get started, run the development server:
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:9002](http://localhost:9002) with your browser to see the result.
